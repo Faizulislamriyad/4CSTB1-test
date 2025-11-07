@@ -214,8 +214,9 @@ body {
     margin-bottom: 16px;
     flex-wrap:wrap;
     gap: 10px;
-    overflow-x: hidden;
+    overflow-x: scroll;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
 }
 
 .subject-cell {
@@ -667,4 +668,5 @@ body {
         font-size: 0.6rem;
         display:flex !important;
     }
+
 }
