@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://fonts.maateen.me/siyam-rupali/font.css" rel="stylesheet">
+    <link href="https://fonts.maateen.me/nikosh/font.css" rel="stylesheet">
+    <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+    <nav class="menu">
+        <ul>
+            <li><a href="index.html"><i class="fa-solid fa-house-user"></i></a></li>
+            <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
+            <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
+            <li><a href="notice.html"><i class="fa-solid fa-bullhorn"></i></a></li>
+            <li class="more"><a href="others.html"><i class="fa-solid fa-bars"></i></a></li>
+        </ul>
+    </nav>
+        <div class="Name">
+            <h1>Welcome to 4CSTB1</h1>
+        </div>
+        <div class="NB">
+            <h2>Important Notice</h2>
+            <div class="Notice">
+                <div class="Ti" onclick="toggleNotice(this)">
+                    ভর্তি নোটিশ
+                </div>
+                <div class="detail">
+                    আগামী ৯ তারিখ এর মধ্যে তোমারা তোমাদের ভর্তি ফি কমপ্লিট করো,ম্যাম <a href="https://www.facebook.com/legend2019.o" target="_blank" rel="noopener noreferrer">আমাকে</a> লিস্ট দিতে বলছে।<br><br>
+                    ভর্তি লিস্ট আর প্রেজেন্ট লিস্ট বিবেচনা করে মিড পরীক্ষার এডমিট কার্ড দেয়া হবে।<br>
+                    "Mst. Rabeya Jannat Mem"
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="headR">
+                <h1>Today's Routine</h1>
+                <p>Showing Only Today's Classes</p>
+                <div class="today-info">
+                    <div class="today-date" id="todayDate"></div>
+                    <div class="today-day" id="today-day"></div>
+                </div>
+            </div>
+            <div class="routine-table-container">
+                <table class="routine-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th><span class="period-time">8:00 - 8:45 AM</span></th>
+                            <th><span class="period-time">8:45 - 9:30 AM</span></th>
+                            <th><span class="period-time">9:30 - 10:15 AM</span></th>
+                            <th><span class="period-time">10:15 - 11:00 AM</span></th>
+                            <th><span class="period-time">11:00 - 11:45 AM</span></th>
+                            <th><span class="period-time">11:45 - 12:30 PM</span></th>
+                            <th><span class="period-time">12:30 - 1:15 PM</span></th>
+                            <th><span class="period-time">1:15 - 2:00 PM</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="todayRoutine">
+                        <!--Javascript-->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </header>
+    <script src="script.js"></script>
+</body>
+</html>
