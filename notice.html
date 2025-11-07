@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
     <nav class="menu">
         <ul>
             <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
@@ -19,9 +18,55 @@
             <li class="more"><a href="others.html"><i class="fa-solid fa-bars"></i></a></li>
         </ul>
     </nav>
-        <div>
-            <h2>Working...</h2>
+    <div class="cont">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>4CSTB1</h1>
+                    <h3>Notice Board</h3>
+                </div>
+                <button id="settingsBtn" class="settings-btn" title="Settings">
+                    <i class="fa-solid fa-gears"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Login success message - initially hidden -->
+        <div id="loginSuccessMessage" class="message-hidden">
+            <span id="successText"></span>
+            <button onclick="hideSuccessMessage()" class="close-btn">×</button>
         </div>
-    </header>
+
+        <!-- Settings panel -->
+        <div id="settingsPanel" class="settings-panel message-hidden">
+            <div class="settings-header">
+                <h3>Admin Login</h3>
+                <button onclick="closeSettings()" class="close-btn">×</button>
+            </div>
+            <div class="input-group">
+                <input type="password" id="adminCode" placeholder="Enter admin code">
+                <button id="verifyBtn">Verify</button>
+            </div>
+            
+            <div id="adminControls" class="message-hidden">
+                <div class="admin-header">
+                    <h3>Logged in as: <span id="currentUser"></span></h3>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="noticeTitle" placeholder="Notice title">
+                    <textarea id="noticeContent" placeholder="Notice details"></textarea>
+                    <button id="addNoticeBtn">Add Notice</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="notices-container">
+            <h2>All Notices</h2>
+            <div id="noticesList">
+                <!-- Notices will be loaded here -->
+            </div>
+        </div>
+    </div>
 </body>
 </html>
