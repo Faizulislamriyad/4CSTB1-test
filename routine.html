@@ -138,17 +138,17 @@
             const dayFilter = document.getElementById('dayFilter');
             const subjectFilter = document.getElementById('subjectFilter');
             
-            // ফিল্টার অ্যাপ্লাই করা
+            // aply filtr
             function applyFilters() {
                 const selectedDay = dayFilter.value;
                 const selectedSubject = subjectFilter.value;
                 
-                // সব সেল থেকে হাইলাইট সরানো
+                // remove highlight (all cell)
                 tableCells.forEach(cell => {
                     cell.classList.remove('highlight');
                 });
                 
-                // ফিল্টার অ্যাপ্লাই করা
+                // aply fltr
                 tableCells.forEach(cell => {
                     const row = cell.parentElement;
                     const day = row.cells[0].textContent.trim();
@@ -169,38 +169,38 @@
                     }
                 });
                 
-                // সার্চ রেজাল্ট আপডেট করা
+                // Srch rslt update
                 if (selectedSubject !== 'all') {
-                    searchResult.innerHTML = `<p><strong>"${selectedSubject}"</strong> বিষয়ের জন্য ফিল্টার করা হয়েছে</p>`;
+                    searchResult.innerHTML = `<p><strong>Filtered for "${selectedSubject}"</strong></p>`;
                     searchResult.style.display = 'block';
                 } else if (selectedDay !== 'all') {
-                    searchResult.innerHTML = `<p><strong>"${selectedDay}"</strong> দিনের জন্য ফিল্টার করা হয়েছে</p>`;
+                    searchResult.innerHTML = `<p><strong>Filtered for "${selectedDay}" </strong></p>`;
                     searchResult.style.display = 'block';
                 } else {
                     searchResult.style.display = 'none';
                 }
             }
             
-            // ফিল্টার ইভেন্ট লিসেনার
+            // filter event listener
             dayFilter.addEventListener('change', applyFilters);
             subjectFilter.addEventListener('change', applyFilters);
             
-            // সার্চ ফাংশন
+            // srch f
             function searchSubject() {
                 const searchTerm = searchInput.value.trim().toLowerCase();
                 
                 if (searchTerm === '') {
-                    searchResult.innerHTML = '<p>দয়া করে একটি বিষয় লিখুন</p>';
+                    searchResult.innerHTML = '<p>Please enter a subject.</p>';
                     searchResult.style.display = 'block';
                     return;
                 }
                 
-                // পূর্বের হাইলাইট সরানো
+                // higlight remove (past)
                 tableCells.forEach(cell => {
                     cell.classList.remove('highlight');
                 });
                 
-                // সার্চ রেজাল্ট খুঁজে বের করা
+                // find srch rslt
                 let results = [];
                 const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
                 
@@ -209,7 +209,7 @@
                     if (cellText.includes(searchTerm) && !cell.classList.contains('Gap')) {
                         cell.classList.add('highlight');
                         
-                        // দিন এবং পিরিয়ড বের করা
+                        // for d & S 
                         const row = cell.parentElement;
                         const dayIndex = row.rowIndex - 1; // 0-based index
                         const periodIndex = cell.cellIndex - 1; // 0-based index
@@ -231,22 +231,22 @@
                     }
                 });
                 
-                // রেজাল্ট দেখানো
+                // Showing rslt
                 if (results.length > 0) {
-                    let resultHTML = `<p><strong>"${searchInput.value}"</strong> বিষয়টি নিচের দিন ও সময়ে রয়েছে:</p><ul>`;
+                    let resultHTML = `<p><strong>"${searchInput.value}"</strong></p><ul>`;
                     results.forEach(result => {
                         resultHTML += `<li>${result.day} - ${result.time} - ${result.subject} - ${result.teacher}</li>`;
                     });
                     resultHTML += '</ul>';
                     searchResult.innerHTML = resultHTML;
                 } else {
-                    searchResult.innerHTML = `<p>"${searchInput.value}" বিষয়টি রুটিনে পাওয়া যায়নি।</p>`;
+                    searchResult.innerHTML = `<p>"${searchInput.value}"Not found</p>`;
                 }
                 
                 searchResult.style.display = 'block';
             }
             
-            // পিরিয়ডের সময় বের করার ফাংশন
+            // Subject Time
             function getPeriodTime(periodIndex) {
                 const times = [
                     '8:00 - 8:45 AM',
@@ -262,7 +262,7 @@
                 return times[periodIndex] || '';
             }
             
-            // ইভেন্ট লিসেনার
+            // Event listener
             searchBtn.addEventListener('click', searchSubject);
             
             searchInput.addEventListener('keyup', function(event) {
@@ -271,10 +271,10 @@
                 }
             });
             
-            // কালার গাইডে ক্লিক করলে ফিল্টার অ্যাপ্লাই করা
+            // filtering sub aftr click Clr sctn 
             document.querySelectorAll('.color-item').forEach(item => {
                 item.addEventListener('click', function() {
-                    const subjectClass = this.classList[1]; // Bu, En, We, ইত্যাদি
+                    const subjectClass = this.classList[1]; // Bu, En, We, etc.
                     const subjectMap = {
                         'Bu': 'Business',
                         'En': 'Environment',
@@ -282,7 +282,8 @@
                         'Ja': 'Java',
                         'Di': 'Digital-2',
                         'Co': 'CPI',
-                        'Da': 'Data'
+                        'Da': 'Data',
+                        'Gap':'No sub'
                     };
                     
                     if (subjectMap[subjectClass]) {
