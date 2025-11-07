@@ -66,6 +66,266 @@
                         <th><span class="period-time">10:15 - 11:00 AM</span></th>
                         <th><span class="period-time">11:00 - 11:45 AM</span></th>
                         <th><span class="period-time">11:45 - 12:30 PM</span></th>
+                        <th><span class="period-time">12:30 - 1:15 PM</span></th>
+                        <th><span class="period-time">1:15 - 2:00 PM</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Sunday</th>
+                        <td class="subject-cell Gap">No sub</td>
+                        <td class="subject-cell Bu">Business<div class="teacher-info">Mostofa Jaman <br>(239)</div></td>
+                        <td class="subject-cell En">Environment<div class="teacher-info">Trishna Chakroborthy <br>(239)</div></td>
+                        <td class="subject-cell We">Web D&D<div class="teacher-info">Selim Khalifa <br>(239)</div></td>
+                        <td class="subject-cell Ja">Java<div class="teacher-info">Mst. Rabeya Jannat <br>(239)</div></td>
+                        <td class="subject-cell Da" colspan="3">Data Structure<div class="teacher-info">Md. Parveg Mia <br>(239)</div></td>
+                    </tr>
+                    <tr>
+                        <th>Monday</th>
+                        <td class="subject-cell En">Environment<div class="teacher-info">Trishna Chakroborthy <br>(338)</div></td>
+                        <td class="subject-cell Da">Data Structure<div class="teacher-info">Md. Parveg Mia <br>(338)</div></td>
+                        <td class="subject-cell Ja">Java<div class="teacher-info">Mst. Rabeya Jannat <br>(338)</div></td>
+                        <td class="subject-cell Di">Digital El-2<div class="teacher-info">GMM Abu Hurayra <br>(338)</div></td>
+                        <td class="subject-cell Co">Computer P&I<div class="teacher-info">Kazi Golam kibria <br>(338)</div></td>
+                        <td class="subject-cell We" colspan="3">Web Design & Devlopment<div class="teacher-info">Selim Khalifa <br> (CMT-2)</div></td>
+                    </tr>
+                    <tr>
+                        <th>Tuesday</th>
+                        <td class="subject-cell Di" colspan="3">Digital EL-2<div class="teacher-info">GMM Abu Hurayra <br>(R & AI Lab)</div></td>
+                        <td class="subject-cell Co">Computer P&I<div class="teacher-info">Kazi Golam kibria <br>(CMT-1)</div></td>
+                        <td class="subject-cell Ja" colspan="3">Java<div class="teacher-info">Mst. Rabeya Jannat <br>(CMT-1)</div></td>
+                        <td class="subject-cell Gap">No sub</td>
+                    </tr>
+                    <tr>
+                        <th>Wednesday</th>
+                        <td class="subject-cell We" colspan="3">Web D&d<div class="teacher-info">Selim Khalifa <br>(CMT-1)</div></td>
+                        <td class="subject-cell Co">Computer P&I<div class="teacher-info">Kazi Golam kibria <br>(240)</div></td>
+                        <td class="subject-cell Di">Digital EL-2<div class="teacher-info">GMM Abu Hurayra <br>(240)</div></td>
+                        <td class="subject-cell Bu">Business<div class="teacher-info">Mostofa Jaman <br>(240)</div></td>
+                        <td class="subject-cell Da">Data Structure<div class="teacher-info">Md. Parveg Mia (240)</div></td>
+                        <td class="subject-cell Gap">No sub</td>
+                    </tr>
+                    <tr>
+                        <th>Thursday</th>
+                        <td class="subject-cell Co" colspan="3">Computer P&I<div class="teacher-info">Kazi Golam kibria <br>(CMT-1)</div></td>
+                        <td class="subject-cell En" colspan="3">Environment<div class="teacher-info">Environment<br>(338)</div></td>
+                        <td class="subject-cell Gap" colspan="2">No sub</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="color-guide">
+            <h3><i class="fas fa-palette"></i> Subject Code & Color</h3>
+            <div class="color-items">
+                <div class="color-item Bu">25831 - Business Communication</div>
+                <div class="color-item En">29041 - Environmental</div>
+                <div class="color-item We">28544 - Web Design & Devlopment</div>
+                <div class="color-item Ja">26841 - Java Programming</div>
+                <div class="color-item Di">26841 - Digital Electronics-2</div>
+                <div class="color-item Co">28543 - Computer Peripherals & Interfacing</div>
+                <div class="color-item Da">28542 - Data Structure</div>
+                <div class="color-item Gap">00000 - Empty Class</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const searchResult = document.getElementById('searchResult');
+            const tableCells = document.querySelectorAll('.routin-table td');
+            const dayFilter = document.getElementById('dayFilter');
+            const subjectFilter = document.getElementById('subjectFilter');
+            
+            // ফিল্টার অ্যাপ্লাই করা
+            function applyFilters() {
+                const selectedDay = dayFilter.value;
+                const selectedSubject = subjectFilter.value;
+                
+                // সব সেল থেকে হাইলাইট সরানো
+                tableCells.forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+                
+                // ফিল্টার অ্যাপ্লাই করা
+                tableCells.forEach(cell => {
+                    const row = cell.parentElement;
+                    const day = row.cells[0].textContent.trim();
+                    const subject = cell.textContent.trim();
+                    
+                    const dayMatch = selectedDay === 'all' || day === selectedDay;
+                    const subjectMatch = selectedSubject === 'all' || 
+                                        (selectedSubject === 'Environment' && subject.includes('Environment')) ||
+                                        (selectedSubject === 'Business' && subject.includes('Business')) ||
+                                        (selectedSubject === 'Web Design' && (subject.includes('Web') || subject.includes('Design'))) ||
+                                        (selectedSubject === 'Java' && subject.includes('Java')) ||
+                                        (selectedSubject === 'Digital-2' && (subject.includes('Digital') || subject.includes('EL-2'))) ||
+                                        (selectedSubject === 'CPI' && (subject.includes('Computer') || subject.includes('P&I'))) ||
+                                        (selectedSubject === 'Data' && subject.includes('Data'));
+                    
+                    if (dayMatch && subjectMatch && !cell.classList.contains('Gap')) {
+                        cell.classList.add('highlight');
+                    }
+                });
+                
+                // সার্চ রেজাল্ট আপডেট করা
+                if (selectedSubject !== 'all') {
+                    searchResult.innerHTML = `<p><strong>"${selectedSubject}"</strong> বিষয়ের জন্য ফিল্টার করা হয়েছে</p>`;
+                    searchResult.style.display = 'block';
+                } else if (selectedDay !== 'all') {
+                    searchResult.innerHTML = `<p><strong>"${selectedDay}"</strong> দিনের জন্য ফিল্টার করা হয়েছে</p>`;
+                    searchResult.style.display = 'block';
+                } else {
+                    searchResult.style.display = 'none';
+                }
+            }
+            
+            // ফিল্টার ইভেন্ট লিসেনার
+            dayFilter.addEventListener('change', applyFilters);
+            subjectFilter.addEventListener('change', applyFilters);
+            
+            // সার্চ ফাংশন
+            function searchSubject() {
+                const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                if (searchTerm === '') {
+                    searchResult.innerHTML = '<p>দয়া করে একটি বিষয় লিখুন</p>';
+                    searchResult.style.display = 'block';
+                    return;
+                }
+                
+                // পূর্বের হাইলাইট সরানো
+                tableCells.forEach(cell => {
+                    cell.classList.remove('highlight');
+                });
+                
+                // সার্চ রেজাল্ট খুঁজে বের করা
+                let results = [];
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+                
+                tableCells.forEach((cell) => {
+                    const cellText = cell.textContent.toLowerCase();
+                    if (cellText.includes(searchTerm) && !cell.classList.contains('Gap')) {
+                        cell.classList.add('highlight');
+                        
+                        // দিন এবং পিরিয়ড বের করা
+                        const row = cell.parentElement;
+                        const dayIndex = row.rowIndex - 1; // 0-based index
+                        const periodIndex = cell.cellIndex - 1; // 0-based index
+                        
+                        if (dayIndex >= 0 && dayIndex < days.length) {
+                            const periodTime = getPeriodTime(periodIndex);
+                            const subject = cell.textContent.split('\n')[0].trim();
+                            const teacherInfo = cell.querySelector('.teacher-info') ? 
+                                cell.querySelector('.teacher-info').textContent.trim() : '';
+                                
+                            results.push({
+                                day: days[dayIndex],
+                                period: periodIndex + 1,
+                                time: periodTime,
+                                subject: subject,
+                                teacher: teacherInfo
+                            });
+                        }
+                    }
+                });
+                
+                // রেজাল্ট দেখানো
+                if (results.length > 0) {
+                    let resultHTML = `<p><strong>"${searchInput.value}"</strong> বিষয়টি নিচের দিন ও সময়ে রয়েছে:</p><ul>`;
+                    results.forEach(result => {
+                        resultHTML += `<li>${result.day} - ${result.time} - ${result.subject} - ${result.teacher}</li>`;
+                    });
+                    resultHTML += '</ul>';
+                    searchResult.innerHTML = resultHTML;
+                } else {
+                    searchResult.innerHTML = `<p>"${searchInput.value}" বিষয়টি রুটিনে পাওয়া যায়নি।</p>`;
+                }
+                
+                searchResult.style.display = 'block';
+            }
+            
+            // পিরিয়ডের সময় বের করার ফাংশন
+            function getPeriodTime(periodIndex) {
+                const times = [
+                    '8:00 - 8:45 AM',
+                    '8:45 - 9:30 AM',
+                    '9:30 - 10:15 AM',
+                    '10:15 - 11:00 AM',
+                    '11:00 - 11:45 AM',
+                    '11:45 - 12:30 PM',
+                    '12:30 - 1:15 PM',
+                    '1:15 - 2:00 PM'
+                ];
+                
+                return times[periodIndex] || '';
+            }
+            
+            // ইভেন্ট লিসেনার
+            searchBtn.addEventListener('click', searchSubject);
+            
+            searchInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    searchSubject();
+                }
+            });
+            
+            // কালার গাইডে ক্লিক করলে ফিল্টার অ্যাপ্লাই করা
+            document.querySelectorAll('.color-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const subjectClass = this.classList[1]; // Bu, En, We, ইত্যাদি
+                    const subjectMap = {
+                        'Bu': 'Business',
+                        'En': 'Environment',
+                        'We': 'Web Design',
+                        'Ja': 'Java',
+                        'Di': 'Digital-2',
+                        'Co': 'CPI',
+                        'Da': 'Data'
+                    };
+                    
+                    if (subjectMap[subjectClass]) {
+                        subjectFilter.value = subjectMap[subjectClass];
+                        applyFilters();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+    </html>                <select id="dayFilter" class="filter-select">
+                    <option value="all">All Day</option>
+                    <option value="Sunday">Sunday</option>
+                    <option value="Monday">Monday</option>
+                    <option value="Tuesday">Tuesday</option>
+                    <option value="Wednesday">Wednesday</option>
+                    <option value="Thursday">Thursday</option>
+                </select>
+                <select id="subjectFilter" class="filter-select">
+                    <option value="all">All Subject</option>
+                    <option value="Environment">Environment</option>
+                    <option value="Business">Business</option>
+                    <option value="Web Design">Web Design</option>
+                    <option value="Java">Java</option>
+                    <option value="Digital-2">Digital-2</option>
+                    <option value="CPI">Computer Peripherals</option>
+                    <option value="Data">Data Structure</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="sc">
+            <table class="routin-table">
+                <thead>
+                    <tr>
+                        <th>D/T</th>
+                        <th><span class="period-time">8:00 - 8:45 AM</span></th>
+                        <th><span class="period-time">8:45 - 9:30 AM</span></th>
+                        <th><span class="period-time">9:30 - 10:15 AM</span></th>
+                        <th><span class="period-time">10:15 - 11:00 AM</span></th>
+                        <th><span class="period-time">11:00 - 11:45 AM</span></th>
+                        <th><span class="period-time">11:45 - 12:30 PM</span></th>
                         <th><span class="period-time">12:00 - 11:15 PM</span></th>
                         <th><span class="period-time">1:15  - 2:00 PM</span></th>
                     </tr>
@@ -270,4 +530,5 @@
         });
     </script>
 </body>
+
 </html>
