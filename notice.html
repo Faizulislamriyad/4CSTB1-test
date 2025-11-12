@@ -1,72 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notice</title>
-    <link href="https://fonts.maateen.me/siyam-rupali/font.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notice</title>
+  <link rel="stylesheet" href="notice.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <nav class="menu">
-        <ul>
-            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
-            <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
-            <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
-            <li><a href="notice.html"><i class="fa-solid fa-file-lines"></i></a></li>
-            <li class="more"><a href="others.html"><i class="fa-solid fa-bars"></i></a></li>
-        </ul>
-    </nav>
-    <div class="cont">
-        <header>
-            <div class="header-content">
-                <div>
-                    <h1>4CSTB1</h1>
-                    <h3>Notice Board</h3>
-                </div>
-                <button id="settingsBtn" class="settings-btn" title="Settings">
-                    <i class="fa-solid fa-gears"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- Login success message - initially hidden -->
-        <div id="loginSuccessMessage" class="message-hidden">
-            <span id="successText"></span>
-            <button onclick="hideSuccessMessage()" class="close-btn">×</button>
-        </div>
-
-        <!-- Settings panel -->
-        <div id="settingsPanel" class="settings-panel message-hidden">
-            <div class="settings-header">
-                <h3>Admin Login</h3>
-                <button onclick="closeSettings()" class="close-btn">×</button>
-            </div>
-            <div class="input-group">
-                <input type="password" id="adminCode" placeholder="Enter admin code">
-                <button id="verifyBtn">Verify</button>
-            </div>
-            
-            <div id="adminControls" class="message-hidden">
-                <div class="admin-header">
-                    <h3>Logged in as: <span id="currentUser"></span></h3>
-                    <button id="logoutBtn" class="logout-btn">Logout</button>
-                </div>
-                <div class="input-group">
-                    <input type="text" id="noticeTitle" placeholder="Notice title">
-                    <textarea id="noticeContent" placeholder="Notice details"></textarea>
-                    <button id="addNoticeBtn">Add Notice</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="notices-container">
-            <h2>All Notices</h2>
-            <div id="noticesList">
-                <!-- Notices will be loaded here -->
-            </div>
-        </div>
+<div>
+  <nav class="menu">
+      <ul>
+          <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+          <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
+          <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
+          <li><a href="notice.html"><i class="fa-solid fa-file-lines"></i></a></li>
+          <li class="more"><a href="others.html"><i class="fa-solid fa-ellipsis-h"></i></a></li>
+      </ul>
+  </nav>
+</div>  
+<div class="hed h-no">
+  <h1>4CSTB1 Notices</h1>
+</div>
+<div class="container">
+  <!-- Header with User Info - Initially hidden, will be shown after login -->
+<header id="headerSection" class="card hidden">
+  <div class="flex-between">
+    <h1 id="adminBoardTitle">Notice Status</h1>
+    <div class="user-info">
+      <span id="userGreeting"><i class="fa-solid fa-user"></i></span>
+      <button id="logoutBtn" class="btn-soft btn-small"><i class="fa-solid fa-sign-out-alt"></i>Logout</button>
     </div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalNotices">0</div>
+      <div class="stat-label">Total Notices</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="publishedNotices">0</div>
+      <div class="stat-label">Published</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pendingRequests">0</div>
+      <div class="stat-label">Draft</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="pinnedNotices">0</div>
+      <div class="stat-label">Pinned</div>
+    </div>
+  </div>
+</header>
+
+  <!-- Admin Panel - Only for admin users icons -->
+  <section id="adminBox" class="card hidden">
+    <div class="tabs">
+      <div class="tab active" data-tab="create"><i class="fa-solid fa-plus-circle"></i></div>
+      <div class="tab" data-tab="manage"><i class="fa-solid fa-folder-open"></i></div>
+      <div class="tab" data-tab="requests"><i class="fa-solid fa-envelope"></i></div>
+      <div class="tab" data-tab="users"><i class="fa-solid fa-users-cog"></i></div>
+    </div>
+    
+    <!-- Create Notice Tab -->
+    <div class="tab-content active" id="create-tab">
+      <h2>Create New Notice</h2>
+      <form id="noticeForm">
+        <input type="hidden" id="noticeId">
+        <div class="form-group">
+          <label class="form-label" for="noticeTitle">Title</label>
+          <input id="noticeTitle" required maxlength="100">
+          <small class="note" id="titleCounter">0/100 characters</small>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="noticeBody">Details</label>
+          <textarea id="noticeBody" rows="6" required maxlength="500"></textarea>
+          <small class="note" id="bodyCounter">0/500 characters</small>
+        </div>
+        <!-- Showing Home Page -->
+        <div class="checkbox-group">
+          <input type="checkbox" id="showOnHomepage">
+          <label for="showOnHomepage">Show on Home Page</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="noticePinned">
+          <label for="noticePinned">Pin (Show at top)</label>
+        </div>
+        <div class="flex gap">
+          <button type="submit" class="btn-success"><i class="fa-solid fa-check"></i> Save Notice</button>
+          <button type="button" id="clearNotice" class="btn-soft"><i class="fa-solid fa-trash"></i> Clear Form</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Manage Notices Tab -->
+    <div class="tab-content" id="manage-tab">
+      <h2>Notice Management</h2>
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchNotices" placeholder="Search notices...">
+      </div>
+      <div id="noticesList"></div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    
+    <!-- Notice Requests Tab -->
+    <div class="tab-content" id="requests-tab">
+      <h2>Notice Requests</h2>
+      <div id="requestsList"></div>
+    </div>
+    
+    <!-- User Management Tab -->
+    <div class="tab-content" id="users-tab">
+      <h2>User Management</h2>
+      <div id="usersList"></div>
+    </div>
+  </section>
+  <!-- Public Notices - Visible to everyone -->
+  <section id="publicNotices" class="card">
+    <h2>Latest Notices</h2>
+    <div id="publicNoticesList"></div>
+    <div class="pagination" id="publicPagination"></div>
+  </section>
+  <!-- User Notice Request Section - For regular users -->
+  <section id="userRequestSection" class="card hidden">
+    <h2>Request a Notice</h2>
+    <form id="noticeRequestForm">
+      <div class="form-group">
+        <label class="form-label" for="requestTitle"><i class="fa-solid fa-file-lines"></i> Title</label>
+        <input id="requestTitle" required maxlength="100">
+        <small class="note" id="requestTitleCounter">0/100 characters</small>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="requestBody">Message</label>
+        <textarea id="requestBody" rows="6" required maxlength="500"></textarea>
+        <small class="note" id="requestBodyCounter">0/500 characters</small>
+      </div>
+      
+      <div class="flex gap">
+        <button type="submit" class="btn-success"><i class="fa-solid fa-check"></i> Submit Request</button>
+        <button type="button" id="clearRequest" class="btn-soft"><i class="fa-solid fa-trash"></i>Clear Form</button>
+      </div>
+    </form>
+    
+    <h3 style="margin-top: 24px;">My Requests</h3>
+    <div id="myRequestsList"></div>
+  </section>
+  <!-- Login Section - Only show when not logged in -->
+  <section id="loginSection" class="card">
+    <h2>Login Required</h2>
+    <p>Login to enjoy More features</p>
+    <div class="flex gap">
+      <a href="others.html" class="btn-success">Login</a>
+    </div>
+  </section>
+</div>
+<footer>
+  <div class="down">
+    <h3>4CSTB1 Official group</h3>
+    <a href="https://m.me/j/AbZjmQXnGCXef1dx/" target="_blank" class="social-link messenger"><i class="fa-solid fa-comments"></i> 4CSTB1 (Notice)</a>
+    <a href="https://chat.whatsapp.com/IVepJktRMpeBQnDRXIEgno" target="_blank" class="social-link whatsapp"><i class="fa-brands fa-whatsapp"></i> 4CSTB1 (Notice)</a>
+    <a href="https://m.me/j/AbYHl9eJ6LJeErfx/" target="_blank" class="social-link messenger"><i class="fa-solid fa-comment-dots"></i> 4CSTB1 (Adda)</a>
+    <a href="https://ig.me/j/AbaS3N6pOawQkxS-/" target="_blank" class="social-link instagram"><i class="fa-brands fa-instagram"></i> 4CSTB1 (Reels Adda)</a>
+    <p>&copy; 2025 4-CST-B1 </p>
+  </div>
+</footer>
+<script src="notice.js"></script>
 </body>
 </html>
