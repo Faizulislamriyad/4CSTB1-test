@@ -14,28 +14,15 @@
     <header>
     <nav class="menu">
         <ul>
-            <li><a href="index.html"><i class="fa-solid fa-house-user"></i></a></li>
+            <li><a href="home.html"><i class="fa-solid fa-house-user"></i></a></li>
             <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
             <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
             <li><a href="notice.html"><i class="fa-solid fa-bullhorn"></i></a></li>
             <li class="more"><a href="others.html"><i class="fa-solid fa-bars"></i></a></li>
         </ul>
     </nav>
-        <div class="Name">
+        <div class="hed">
             <h1>Welcome to 4CSTB1</h1>
-        </div>
-        <div class="NB">
-            <h2>Important Notice</h2>
-            <div class="Notice">
-                <div class="Ti" onclick="toggleNotice(this)">
-                    ভর্তি নোটিশ
-                </div>
-                <div class="detail">
-                    আগামী ৯ তারিখ এর মধ্যে তোমারা তোমাদের ভর্তি ফি কমপ্লিট করো,ম্যাম <a href="https://www.facebook.com/legend2019.o" target="_blank" rel="noopener noreferrer">আমাকে</a> লিস্ট দিতে বলছে।<br><br>
-                    ভর্তি লিস্ট আর প্রেজেন্ট লিস্ট বিবেচনা করে মিড পরীক্ষার এডমিট কার্ড দেয়া হবে।<br>
-                    "Mst. Rabeya Jannat Mem"
-                </div>
-            </div>
         </div>
         <div class="container">
             <div class="headR">
@@ -67,7 +54,31 @@
                 </table>
             </div>
         </div>
+        <div class="NB">
+            <h2>Important Notice</h2>
+            <div id="homepageNotices">
+            <!-- Notices will be loaded here by JavaScript -->
+            </div>
+            <div id="defaultNotice" class="Notice">
+                <div class="Ti" onclick="toggleNotice(this)">
+                    ভর্তি নোটিশ
+                </div>
+                <div class="detail">
+                    Demo!!
+                </div>
+            </div>
+        </div>
     </header>
-    <script src="script.js"></script>
+    <footer>
+        <div class="down">
+            <h3>4CSTB1 Official group</h3>
+            <a href="https://m.me/j/AbZjmQXnGCXef1dx/" target="_blank" class="social-link messenger"><i class="fa-solid fa-comments"></i> 4CSTB1 (Notice)</a>
+            <a href="https://chat.whatsapp.com/IVepJktRMpeBQnDRXIEgno" target="_blank" class="social-link whatsapp"><i class="fa-brands fa-whatsapp"></i> 4CSTB1 (Notice)</a>
+            <a href="https://m.me/j/AbYHl9eJ6LJeErfx/" target="_blank" class="social-link messenger"><i class="fa-solid fa-comment-dots"></i> 4CSTB1 (Adda)</a>
+            <a href="https://ig.me/j/AbaS3N6pOawQkxS-/" target="_blank" class="social-link instagram"><i class="fa-brands fa-instagram"></i> 4CSTB1 (Reels Adda)</a>
+            <p>&copy; 2025 4-CST-B1 </p>
+        </div>
+    </footer>
+    <script src="home.js"></script>
 </body>
 </html>
