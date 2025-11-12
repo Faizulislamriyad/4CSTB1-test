@@ -6,20 +6,71 @@
     <title>Others</title>
     <link href="https://fonts.maateen.me/siyam-rupali/font.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="others.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
 <body>
     <header>
-    <nav class="menu">
-        <ul>
-            <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
-            <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
-            <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
-            <li><a href="notice.html"><i class="fa-solid fa-bullhorn"></i></a></li>
-            <li class="more"><a href="others.html"><i class="fa-solid fa-ellipsis-h"></i></a></li>
-        </ul>
-    </nav>
-        <div><h2>Working...</h2></div>
+        <nav class="menu">
+            <ul>
+                <li><a href="index.html"><i class="fa-solid fa-house"></i></a></li>
+                <li><a href="routine.html"><i class="fas fa-calendar-alt"></i></a></li>
+                <li><a href="student.html"><i class="fa-solid fa-user-graduate"></i></a></li>
+                <li><a href="notice.html"><i class="fa-solid fa-bullhorn"></i></a></li>
+                <li class="more"><a href="others.html"><i class="fa-solid fa-ellipsis-h"></i></a></li>
+            </ul>
+        </nav>
     </header>
+    
+    <main>
+        <!-- User Info Section (shown after login) -->
+        <div id="userInfoSection" class="user-info hidden">
+            <h2>Welcome, <span id="userGreeting"></span>!</h2>
+            <p>You are now logged in to the system.</p>
+            <button id="logoutBtn" class="btn btn-soft">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+            <p style="margin-top: 20px;">
+                <a href="notice.html">
+                    <i class="fa-solid fa-arrow-right"></i> Go to Admin Panel
+                </a>
+            </p>
+        </div>
+        
+        <!-- Login Section (shown when not logged in) -->
+        <div id="loginSection" class="login-container">
+            <h2><i class="fa-solid fa-user-lock"></i> Login</h2>
+            <div id="authAlert"></div>
+            <form id="authForm">
+                <div class="form-group">
+                    <label class="form-label" for="authUser">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input id="authUser" class="form-input" required minlength="3" maxlength="20" placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="authPass">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input id="authPass" class="form-input" type="password" required minlength="6" placeholder="Enter your password">
+                </div>
+                
+                <div class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me for 30 days</label>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button type="button" id="signupBtn" class="btn btn-soft">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </button>
+            </form>
+        </div>
+    </main>
+    <script src="others.js"></script>
 </body>
 </html>
