@@ -1,33 +1,15 @@
-// Constants
+// Constants - Keep these for transition
 const STORAGE_USERS = 'mini_users_box';
 const STORAGE_REMEMBER_ME = 'mini_remember_me';
 const SESSION_USER = 'session_user_box';
 
-// Utility functions
-function loadUsers() {
-    return JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]');
-}
-
+// Utility functions - Updated for Firebase
 function getCurrentUser() {
     // First check session storage
     const sessionUser = sessionStorage.getItem(SESSION_USER);
     if (sessionUser) {
         return JSON.parse(sessionUser);
     }
-        
-    // Then check remember me
-    const rememberMe = localStorage.getItem(STORAGE_REMEMBER_ME);
-    if (rememberMe) {
-        const rememberedUser = JSON.parse(rememberMe);
-        // Verify user still exists
-        const users = loadUsers();
-        const userExists = users.find(u => u.username === rememberedUser.username && u.password === rememberedUser.password);
-        if (userExists) {
-            setCurrentUser(userExists);
-            return userExists;
-        }
-    }
-        
     return null;
 }
 
@@ -38,13 +20,6 @@ function setCurrentUser(user) {
 function clearCurrentUser() {
     sessionStorage.removeItem(SESSION_USER);
     localStorage.removeItem(STORAGE_REMEMBER_ME);
-}
-
-function setRememberMe(user) {
-    localStorage.setItem(STORAGE_REMEMBER_ME, JSON.stringify({
-        username: user.username,
-        password: user.password
-    }));
 }
 
 function showAlert(message, type, containerId = 'authAlert') {
@@ -70,17 +45,29 @@ const userGreeting = document.getElementById('userGreeting');
 const rememberMeCheckbox = document.getElementById('rememberMe');
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is already logged in (auto-login if remembered)
-    const user = getCurrentUser();
-    if (user && user.username) {
-        showUserInfo(user);
-        showAlert('Auto login successful!', 'success');
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is already logged in with Firebase
+    try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+            const userData = {
+                uid: user.uid,
+                username: user.email.split('@')[0], // Extract username from email
+                email: user.email,
+                displayName: user.displayName || user.email.split('@')[0],
+                role: user.email.includes('riyad') || user.email.includes('shaomi') ? 'admin' : 'user'
+            };
+            setCurrentUser(userData);
+            showUserInfo(userData);
+            showAlert('Auto login successful!', 'success');
+        }
+    } catch (error) {
+        console.log('No user logged in');
     }
 });
 
-// AUTHENTICATION WITH REMEMBER ME
-authForm.addEventListener('submit', function(e) {
+// FIREBASE AUTHENTICATION
+authForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const submitBtn = authForm.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
@@ -91,7 +78,6 @@ authForm.addEventListener('submit', function(e) {
         
     const username = document.getElementById('authUser').value.trim();
     const password = document.getElementById('authPass').value;
-    const rememberMe = rememberMeCheckbox.checked;
         
     if (!username || !password) {
         showAlert('Username and password are required.', 'error');
@@ -99,36 +85,47 @@ authForm.addEventListener('submit', function(e) {
         submitBtn.disabled = false;
         return;
     }
+    
+    try {
+        // Convert username to email format for Firebase
+        const email = `${username}@4cstb1.com`;
         
-    // Simulate network delay
-    setTimeout(() => {
-        const users = loadUsers();
-        const foundUser = users.find(u => u.username === username && u.password === password);
+        console.log('Attempting Firebase login with:', email);
+        
+        // Firebase login
+        const result = await authService.login(email, password);
             
-        if (foundUser) {
-            setCurrentUser(foundUser);
-                
-            // Save to remember me if checked
-            if (rememberMe) {
-                setRememberMe(foundUser);
-            }
-                
-            showUserInfo(foundUser);
+        if (result.success) {
+            const userData = {
+                uid: result.user.uid,
+                username: username,
+                email: result.user.email,
+                displayName: result.user.displayName || username,
+                role: result.user.email.includes('riyad') || result.user.email.includes('shaomi') ? 'admin' : 'user'
+            };
+            
+            setCurrentUser(userData);
+            showUserInfo(userData);
             showAlert('Login successful!', 'success');
                 
-            // Redirect to admin.html after successful login
+            // Redirect to notice page after successful login
             setTimeout(() => {
                 window.location.href = 'notice.html';
             }, 1500);
         } else {
-            showAlert('Username or password does not match. Please try signing up.', 'error');
+            showAlert(result.error, 'error');
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
-    }, 1000);
+    } catch (error) {
+        showAlert('Login failed. Please try again.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
 });
 
-signupBtn.addEventListener('click', function() {
+// FIREBASE SIGNUP
+signupBtn.addEventListener('click', async function() {
     const username = prompt('Username:');
     if (!username || username.length < 3) {
         alert('Username must be at least 3 characters long.');
@@ -140,27 +137,25 @@ signupBtn.addEventListener('click', function() {
         alert('Password must be at least 6 characters long.');
         return;
     }
+    
+    const displayName = prompt('Display Name:') || username;
+    
+    try {
+        const email = `${username}@4cstb1.com`;
+        const result = await authService.signUp(email, password, displayName);
         
-    const users = loadUsers();
-    if (users.some(u => u.username === username)) {
-        alert('This username is already taken.');
-        return;
+        if (result.success) {
+            alert('Account created successfully! Please login now.');
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Signup failed: ' + error.message);
     }
-        
-    const newUser = {
-        id: Date.now(),
-        username: username,
-        password: password,
-        role: 'user',
-        createdAt: Date.now()
-    };
-        
-    users.push(newUser);
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-    alert('Account created successfully. Please login now.');
 });
 
-logoutBtn.addEventListener('click', function() {
+// FIREBASE LOGOUT
+logoutBtn.addEventListener('click', async function() {
     const logoutBtnElement = this;
     const originalText = logoutBtnElement.innerHTML;
         
@@ -168,26 +163,38 @@ logoutBtn.addEventListener('click', function() {
     logoutBtnElement.innerHTML = '<span class="loading"></span> Logging out...';
     logoutBtnElement.disabled = true;
         
-    setTimeout(() => {
-        clearCurrentUser();
-        showAlert('Logout successful!', 'success');
-            
-        // Show login section after logout
-        setTimeout(() => {
-            userInfoSection.classList.add('hidden');
-            loginSection.classList.remove('hidden');
-            authForm.reset();
+    try {
+        const result = await authService.logout();
+        
+        if (result.success) {
+            clearCurrentUser();
+            showAlert('Logout successful!', 'success');
+                
+            // Show login section after logout
+            setTimeout(() => {
+                userInfoSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                authForm.reset();
+                logoutBtnElement.innerHTML = originalText;
+                logoutBtnElement.disabled = false;
+            }, 1000);
+        } else {
+            showAlert('Logout failed: ' + result.error, 'error');
             logoutBtnElement.innerHTML = originalText;
             logoutBtnElement.disabled = false;
-        }, 1000);
-    }, 800);
+        }
+    } catch (error) {
+        showAlert('Logout failed. Please try again.', 'error');
+        logoutBtnElement.innerHTML = originalText;
+        logoutBtnElement.disabled = false;
+    }
 });
 
 function showUserInfo(user) {
     if (loginSection) loginSection.classList.add('hidden');
     if (userInfoSection) userInfoSection.classList.remove('hidden');
     if (userGreeting) {
-        userGreeting.textContent = user.username + (user.role === 'admin' ? ' (Admin)' : '');
+        userGreeting.textContent = (user.displayName || user.username) + (user.role === 'admin' ? ' (Admin)' : '');
     }
 }
 
