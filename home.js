@@ -7,7 +7,7 @@ function toggleNotice(element) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Day names
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     
@@ -153,78 +153,132 @@ document.addEventListener('DOMContentLoaded', function() {
     
     tbody.appendChild(row);
     
-    // Load homepage notices
-    loadHomepageNotices();
+    // Load homepage notices from Firebase
+    await loadHomepageNotices();
 });
 
-// MAXIMUM 5 TA NOTICE LOAD
-function loadHomepageNotices() {
+// MAXIMUM 5 TA NOTICE LOAD - FIREBASE VERSION
+async function loadHomepageNotices() {
     const homepageNoticesContainer = document.getElementById('homepageNotices');
     const defaultNotice = document.getElementById('defaultNotice');
     
     if (!homepageNoticesContainer) return;
     
-    // Load notices from localStorage
-    const notices = JSON.parse(localStorage.getItem('mini_notices_box') || '[]');
-    
-    // Filter notices that are marked for homepage and published
-    const homepageNotices = notices.filter(notice => 
-        notice.showOnHomepage && notice.published
-    );
-    
-    // Sort by creation date (newest first)
-    homepageNotices.sort((a, b) => b.createdAt - a.createdAt);
-    
-    // Clear container
-    homepageNoticesContainer.innerHTML = '';
-    
-    if (homepageNotices.length > 0) {
-        // Show maximum 5 notices (newest first)
-        const noticesToShow = homepageNotices.slice(0, 5);
+    try {
+        // Firebase থেকে নোটিস লোড করুন
+        const notices = await dbService.getNotices();
         
-        noticesToShow.forEach((notice, index) => {
-            const noticeElement = document.createElement('div');
-            noticeElement.className = 'Notice';
-            noticeElement.innerHTML = `
-                <div class="Ti" onclick="toggleNotice(this)">
-                    <span class="notice-badge">${index + 1}</span>
-                    ${notice.title}
-                    ${notice.pinned ? '<i class="fas fa-thumbtack pinned-icon"></i>' : ''}
-                </div>
-                <div class="detail">
-                    ${notice.body.replace(/\n/g, '<br>')}
-                    <div class="notice-meta">
-                        <i class="fas fa-user"></i> ${notice.author} 
-                        | <i class="fas fa-calendar"></i> ${formatHomepageDate(notice.createdAt)}
-                        ${notice.pinned ? '| <i class="fas fa-thumbtack"></i> Pinned' : ''}
-                    </div>
-                </div>
-            `;
+        // Filter notices that are marked for homepage and published
+        const homepageNotices = notices.filter(notice => 
+            notice.showOnHomepage && notice.published
+        );
+        
+        // Sort by creation date (newest first)
+        homepageNotices.sort((a, b) => b.createdAt - a.createdAt);
+        
+        // Clear container
+        homepageNoticesContainer.innerHTML = '';
+        
+        if (homepageNotices.length > 0) {
+            // Show maximum 5 notices (newest first)
+            const noticesToShow = homepageNotices.slice(0, 5);
             
-            homepageNoticesContainer.appendChild(noticeElement);
-        });
-        
-        // যদি ৫টির বেশি notice থাকে তবে message show করুন
-        if (homepageNotices.length > 5) {
-            const moreNotice = document.createElement('div');
-            moreNotice.className = 'Notice';
-            moreNotice.innerHTML = `
-                <div class="Ti" style="background: #666; cursor: default; text-align: center;">
-                    <i class="fas fa-info-circle"></i>
-                    ${homepageNotices.length - 5} More!
-                </div>
-            `;
-            homepageNoticesContainer.appendChild(moreNotice);
+            noticesToShow.forEach((notice, index) => {
+                const noticeElement = document.createElement('div');
+                noticeElement.className = 'Notice';
+                noticeElement.innerHTML = `
+                    <div class="Ti" onclick="toggleNotice(this)">
+                        <span class="notice-badge">${index + 1}</span>
+                        ${notice.title}
+                        ${notice.pinned ? '<i class="fas fa-thumbtack pinned-icon"></i>' : ''}
+                    </div>
+                    <div class="detail">
+                        ${notice.body.replace(/\n/g, '<br>')}
+                        <div class="notice-meta">
+                            <i class="fas fa-user"></i> ${notice.author} 
+                            | <i class="fas fa-calendar"></i> ${formatHomepageDate(notice.createdAt)}
+                            ${notice.pinned ? '| <i class="fas fa-thumbtack"></i> Pinned' : ''}
+                        </div>
+                    </div>
+                `;
+                
+                homepageNoticesContainer.appendChild(noticeElement);
+            });
+            
+            // যদি ৫টির বেশি notice থাকে তবে message show করুন
+            if (homepageNotices.length > 5) {
+                const moreNotice = document.createElement('div');
+                moreNotice.className = 'Notice';
+                moreNotice.innerHTML = `
+                    <div class="Ti" style="background: #666; cursor: default; text-align: center;">
+                        <i class="fas fa-info-circle"></i>
+                        ${homepageNotices.length - 5} More Notices Available!
+                    </div>
+                `;
+                homepageNoticesContainer.appendChild(moreNotice);
+            }
+            
+            // Hide default notice if we have homepage notices
+            if (defaultNotice) {
+                defaultNotice.style.display = 'none';
+            }
+        } else {
+            // Show default notice if no homepage notices
+            if (defaultNotice) {
+                defaultNotice.style.display = 'block';
+            }
         }
+    } catch (error) {
+        console.error('Error loading homepage notices:', error);
         
-        // Hide default notice if we have homepage notices
-        if (defaultNotice) {
-            defaultNotice.style.display = 'none';
-        }
-    } else {
-        // Show default notice if no homepage notices
-        if (defaultNotice) {
-            defaultNotice.style.display = 'block';
+        // Fallback to localStorage if Firebase fails
+        try {
+            const notices = JSON.parse(localStorage.getItem('mini_notices_box') || '[]');
+            const homepageNotices = notices.filter(notice => 
+                notice.showOnHomepage && notice.published
+            );
+            
+            homepageNotices.sort((a, b) => b.createdAt - a.createdAt);
+            homepageNoticesContainer.innerHTML = '';
+            
+            if (homepageNotices.length > 0) {
+                const noticesToShow = homepageNotices.slice(0, 5);
+                
+                noticesToShow.forEach((notice, index) => {
+                    const noticeElement = document.createElement('div');
+                    noticeElement.className = 'Notice';
+                    noticeElement.innerHTML = `
+                        <div class="Ti" onclick="toggleNotice(this)">
+                            <span class="notice-badge">${index + 1}</span>
+                            ${notice.title}
+                            ${notice.pinned ? '<i class="fas fa-thumbtack pinned-icon"></i>' : ''}
+                        </div>
+                        <div class="detail">
+                            ${notice.body.replace(/\n/g, '<br>')}
+                            <div class="notice-meta">
+                                <i class="fas fa-user"></i> ${notice.author} 
+                                | <i class="fas fa-calendar"></i> ${formatHomepageDate(notice.createdAt)}
+                                ${notice.pinned ? '| <i class="fas fa-thumbtack"></i> Pinned' : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    homepageNoticesContainer.appendChild(noticeElement);
+                });
+                
+                if (defaultNotice) {
+                    defaultNotice.style.display = 'none';
+                }
+            } else {
+                if (defaultNotice) {
+                    defaultNotice.style.display = 'block';
+                }
+            }
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+            if (defaultNotice) {
+                defaultNotice.style.display = 'block';
+            }
         }
     }
 }
@@ -237,3 +291,19 @@ function formatHomepageDate(timestamp) {
         day: 'numeric'
     });
 }
+
+// Real-time updates for homepage notices
+function enableHomepageRealTimeUpdates() {
+    try {
+        dbService.onNoticesChange((notices) => {
+            loadHomepageNotices();
+        });
+    } catch (error) {
+        console.log('Homepage real-time updates not available:', error);
+    }
+}
+
+// Enable real-time updates when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    enableHomepageRealTimeUpdates();
+});
