@@ -5,22 +5,17 @@ const STORAGE_REMEMBER_ME = 'mini_remember_me';
 const SESSION_USER = 'session_user_box';
 const NOTICES_PER_PAGE = 5;
 
-// Firebase Functions - NEW
+// Firebase Functions
 async function saveUsers(users) {
-  // For Firebase, users are managed in Firebase Authentication
-  // We'll keep this for backward compatibility
   localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
 }
 
 async function loadUsers() {
-  // For Firebase, we'll get users from Firebase Auth
   return JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]');
 }
 
 async function saveNotices(notices) {
-  // For Firebase, we save to Firestore
   try {
-    // Clear existing notices and save new ones
     localStorage.setItem(STORAGE_NOTICES, JSON.stringify(notices));
   } catch (error) {
     console.error('Error saving notices to localStorage:', error);
@@ -29,12 +24,10 @@ async function saveNotices(notices) {
 
 async function loadNotices() {
   try {
-    // Try Firebase first
     const firebaseNotices = await dbService.getNotices();
     if (firebaseNotices && firebaseNotices.length > 0) {
       return firebaseNotices;
     }
-    // Fallback to localStorage
     return JSON.parse(localStorage.getItem(STORAGE_NOTICES) || '[]');
   } catch (error) {
     console.error('Error loading notices:', error);
@@ -52,12 +45,10 @@ async function saveRequests(requests) {
 
 async function loadRequests() {
   try {
-    // Try Firebase first
     const firebaseRequests = await dbService.getRequests();
     if (firebaseRequests && firebaseRequests.length > 0) {
       return firebaseRequests;
     }
-    // Fallback to localStorage
     return JSON.parse(localStorage.getItem(STORAGE_REQUESTS) || '[]');
   } catch (error) {
     console.error('Error loading requests:', error);
@@ -66,13 +57,11 @@ async function loadRequests() {
 }
 
 function getCurrentUser() {
-  // First check session storage
   const sessionUser = sessionStorage.getItem(SESSION_USER);
   if (sessionUser) {
     return JSON.parse(sessionUser);
   }
   
-  // Remember me option check
   const rememberMe = localStorage.getItem(STORAGE_REMEMBER_ME);
   if (rememberMe) {
     const rememberedUser = JSON.parse(rememberMe);
@@ -153,7 +142,6 @@ function checkLoginStatus() {
   // No Default Note
   const notices = await loadNotices();
   if (notices.length === 0) {
-    // No sample notices will be added
     await saveNotices([]);
   }
 })();
@@ -170,10 +158,8 @@ const noticesList = document.getElementById('noticesList');
 const requestsList = document.getElementById('requestsList');
 const myRequestsList = document.getElementById('myRequestsList');
 const publicNoticesList = document.getElementById('publicNoticesList');
-const usersList = document.getElementById('usersList');
 const logoutBtn = document.getElementById('logoutBtn');
 const authAlert = document.getElementById('authAlert');
-const searchNotices = document.getElementById('searchNotices');
 const titleCounter = document.getElementById('titleCounter');
 const bodyCounter = document.getElementById('bodyCounter');
 const requestTitleCounter = document.getElementById('requestTitleCounter');
@@ -183,18 +169,27 @@ const rememberMeCheckbox = document.getElementById('rememberMe');
 // State variables
 let currentPage = 1;
 let currentPublicPage = 1;
-let searchQuery = '';
 
 // Show/hide sections based on user role and page
 async function showSectionsBasedOnRole(user, page) {
   // Always show menu bar and public notices
-  if (headerSection) headerSection.classList.add('hidden'); // Initially hide header
+  if (headerSection) headerSection.classList.add('hidden');
   if (publicNotices) publicNotices.classList.remove('hidden');
   
   // Hide role-specific sections first
   if (authSection) authSection.classList.add('hidden');
   if (adminBox) adminBox.classList.add('hidden');
   if (userRequestSection) userRequestSection.classList.add('hidden');
+  
+  // ✅ LOGIN SECTION HANDLING - Hide when user is logged in
+  const loginSection = document.getElementById('loginSection');
+  if (loginSection) {
+    if (user) {
+      loginSection.classList.add('hidden');
+    } else {
+      loginSection.classList.remove('hidden');
+    }
+  }
   
   if (!user) {
     // Not logged in - show only login section
@@ -219,7 +214,7 @@ async function showSectionsBasedOnRole(user, page) {
       // Only show admin board and admin box for admin users
       if (headerSection) headerSection.classList.remove('hidden');
       if (adminBox) adminBox.classList.remove('hidden');
-      if (publicNotices) publicNotices.classList.add('hidden'); // Notice Hide hobe 4 admin
+      if (publicNotices) publicNotices.classList.add('hidden');
       await updateStats();
       await renderNotices();
     } else {
@@ -288,23 +283,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
       
       if (this.dataset.tab === 'manage') {
-        await renderNotices(currentPage, searchQuery);
+        await renderNotices(currentPage);
       } else if (this.dataset.tab === 'requests') {
         await renderRequests();
-      } else if (this.dataset.tab === 'users') {
-        await renderUsers();
       }
     });
   });
-  
-  // Search functionality
-  if (searchNotices) {
-    searchNotices.addEventListener('input', function() {
-      searchQuery = this.value;
-      currentPage = 1;
-      renderNotices(currentPage, searchQuery);
-    });
-  }
 });
 
 // AUTHENTICATION WITH REMEMBER ME
@@ -329,6 +313,12 @@ if (authForm) {
       // Save to remember me if checked
       if (rememberMe) {
         setRememberMe(foundUser);
+      }
+      
+      // ✅ HIDE LOGIN SECTION AFTER SUCCESSFUL LOGIN
+      const loginSection = document.getElementById('loginSection');
+      if (loginSection) {
+        loginSection.classList.add('hidden');
       }
       
       // Get current page and show appropriate sections
@@ -382,6 +372,13 @@ if (logoutBtn) {
     // Show auth section after logout
     const currentPageName = window.location.pathname.split('/').pop() || 'others.html';
     showSectionsBasedOnRole(null, currentPageName);
+    
+    // ✅ LOGIN SECTION SHOW AFTER LOGOUT
+    const loginSection = document.getElementById('loginSection');
+    if (loginSection) {
+      loginSection.classList.remove('hidden');
+    }
+    
     showAlert('Logout successful!', 'success');
   });
 }
@@ -467,7 +464,7 @@ async function saveNotice() {
       
       showAlert('Notice published successfully!', 'success', 'authAlert');
       
-      await renderNotices(currentPage, searchQuery);
+      await renderNotices(currentPage);
       await showPublicNotices();
       await updateStats();
     } else {
@@ -548,7 +545,7 @@ async function deleteNotice(id) {
       const result = await dbService.deleteNotice(id);
       
       if (result.success) {
-        await renderNotices(currentPage, searchQuery);
+        await renderNotices(currentPage);
         await showPublicNotices();
         await updateStats();
         showAlert('Notice deleted successfully.', 'success', 'authAlert');
@@ -561,7 +558,7 @@ async function deleteNotice(id) {
       const updatedNotices = notices.filter(n => n.id !== id);
       await saveNotices(updatedNotices);
       
-      await renderNotices(currentPage, searchQuery);
+      await renderNotices(currentPage);
       await showPublicNotices();
       await updateStats();
       showAlert('Notice deleted successfully.', 'success', 'authAlert');
@@ -583,7 +580,7 @@ async function togglePublishStatus(id) {
     try {
       const result = await dbService.updateNotice(id, updatedNotice);
       if (result.success) {
-        await renderNotices(currentPage, searchQuery);
+        await renderNotices(currentPage);
         await showPublicNotices();
         await updateStats();
       }
@@ -593,7 +590,7 @@ async function togglePublishStatus(id) {
         n.id === id ? updatedNotice : n
       );
       await saveNotices(updatedNotices);
-      await renderNotices(currentPage, searchQuery);
+      await renderNotices(currentPage);
       await showPublicNotices();
       await updateStats();
     }
@@ -614,7 +611,7 @@ async function togglePinStatus(id) {
     try {
       const result = await dbService.updateNotice(id, updatedNotice);
       if (result.success) {
-        await renderNotices(currentPage, searchQuery);
+        await renderNotices(currentPage);
         await showPublicNotices();
         await updateStats();
       }
@@ -624,7 +621,7 @@ async function togglePinStatus(id) {
         n.id === id ? updatedNotice : n
       );
       await saveNotices(updatedNotices);
-      await renderNotices(currentPage, searchQuery);
+      await renderNotices(currentPage);
       await showPublicNotices();
       await updateStats();
     }
@@ -682,19 +679,10 @@ async function rejectRequest(requestId) {
 }
 
 // Rendering functions
-async function renderNotices(page = 1, query = '') {
+async function renderNotices(page = 1) {
   if (!noticesList) return;
   
   let notices = await loadNotices();
-  
-  // Filter by search query
-  if (query) {
-    const lowercaseQuery = query.toLowerCase();
-    notices = notices.filter(n => 
-      n.title.toLowerCase().includes(lowercaseQuery) || 
-      n.body.toLowerCase().includes(lowercaseQuery)
-    );
-  }
   
   // Sort by pinned first, then by creation date (newest first)
   notices.sort((a, b) => {
@@ -753,7 +741,7 @@ async function renderNotices(page = 1, query = '') {
   if (document.getElementById('pagination')) {
     renderPagination('pagination', page, totalPages, (newPage) => {
       currentPage = newPage;
-      renderNotices(currentPage, searchQuery);
+      renderNotices(currentPage);
     });
   }
 }
@@ -882,44 +870,6 @@ async function showPublicNotices(page = 1) {
   }
 }
 
-async function renderUsers() {
-  if (!usersList) return;
-  
-  const users = await loadUsers();
-  const currentUser = getCurrentUser();
-  
-  usersList.innerHTML = '';
-  
-  if (users.length === 0) {
-    usersList.innerHTML = '<div class="alert alert-info">No users found.</div>';
-    return;
-  }
-  
-  users.forEach(user => {
-    const div = document.createElement('div');
-    div.className = 'user-info';
-    
-    div.innerHTML = `
-      <div class="flex-between">
-        <div>
-          <strong>${user.username}</strong>
-          <span class="status-badge ${user.role === 'admin' ? 'status-published' : 'status-draft'}">
-            ${user.role === 'admin' ? 'Admin' : 'User'}
-          </span>
-        </div>
-        <div>
-          <small>Member since: ${formatDate(user.createdAt)}</small>
-          ${currentUser && currentUser.role === 'admin' && user.id !== currentUser.id ? 
-            `<button class="btn-small btn-danger" onclick="deleteUser(${user.id})">Delete</button>` : 
-            ''}
-        </div>
-      </div>
-    `;
-    
-    usersList.appendChild(div);
-  });
-}
-
 function renderPagination(containerId, currentPage, totalPages, onPageChange) {
   const container = document.getElementById(containerId);
   
@@ -958,20 +908,8 @@ function renderPagination(containerId, currentPage, totalPages, onPageChange) {
   }
 }
 
-async function deleteUser(userId) {
-  if (confirm('Are you sure you want to delete this user?')) {
-    const users = await loadUsers();
-    const updatedUsers = users.filter(u => u.id !== userId);
-    await saveUsers(updatedUsers);
-    await renderUsers();
-    showAlert('User deleted successfully.', 'success', 'authAlert');
-  }
-}
-
 async function updateStats() {
   const notices = await loadNotices();
-  const requests = await loadRequests();
-  const pendingRequests = requests.filter(r => r.status === 'pending').length;
   
   if (document.getElementById('totalNotices')) {
     document.getElementById('totalNotices').textContent = notices.length;
@@ -979,9 +917,6 @@ async function updateStats() {
   if (document.getElementById('publishedNotices')) {
     document.getElementById('publishedNotices').textContent = 
       notices.filter(n => n.published).length;
-  }
-  if (document.getElementById('pendingRequests')) {
-    document.getElementById('pendingRequests').textContent = pendingRequests;
   }
   if (document.getElementById('pinnedNotices')) {
     document.getElementById('pinnedNotices').textContent = 
