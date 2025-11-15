@@ -8,13 +8,12 @@
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- FIREBASE SDK - ADD THIS SECTION -->
+  <!-- FIREBASE SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // Your Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyC891u30sasoaLeqt3QTBul7qsDLWVuP4s",
       authDomain: "class-4cstb1.firebaseapp.com",
@@ -24,12 +23,8 @@
       appId: "1:548144468364:web:20cd0f056408405bf7c6a9",
       measurementId: "G-0G4N2CV4FR"
     };
-
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
   </script>
-  <!-- END FIREBASE SDK -->
-
 </head>
 <body>
 <div>
@@ -47,46 +42,38 @@
   <h1>4CSTB1 Notices</h1>
 </div>
 <div class="container">
-  <!-- Header with User Info - Initially hidden, will be shown after login -->
-<header id="headerSection" class="card hidden">
-  <div class="flex-between">
-    <h1 id="adminBoardTitle">Notice Status</h1>
-    <div class="user-info">
-      <span id="userGreeting"><i class="fa-solid fa-user"></i></span>
-      <button id="logoutBtn" class="btn-soft btn-small"><i class="fa-solid fa-sign-out-alt"></i>Logout</button>
+  <header id="headerSection" class="card hidden">
+    <div class="flex-between">
+      <h1 id="adminBoardTitle">Notice Status</h1>
+      <div class="user-info">
+        <span id="userGreeting"><i class="fa-solid fa-user"></i></span>
+        <button id="logoutBtn" class="btn-soft btn-small"><i class="fa-solid fa-sign-out-alt"></i>Logout</button>
+      </div>
     </div>
-  </div>
-  
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-number" id="totalNotices">0</div>
-      <div class="stat-label">Total Notices</div>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="totalNotices">0</div>
+        <div class="stat-label">Total Notices</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="publishedNotices">0</div>
+        <div class="stat-label">Published</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="pinnedNotices">0</div>
+        <div class="stat-label">Pinned</div>
+      </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-number" id="publishedNotices">0</div>
-      <div class="stat-label">Published</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="pendingRequests">0</div>
-      <div class="stat-label">Draft</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="pinnedNotices">0</div>
-      <div class="stat-label">Pinned</div>
-    </div>
-  </div>
-</header>
+  </header>
 
-  <!-- Admin Panel - Only for admin users icons -->
   <section id="adminBox" class="card hidden">
     <div class="tabs">
       <div class="tab active" data-tab="create"><i class="fa-solid fa-plus-circle"></i></div>
       <div class="tab" data-tab="manage"><i class="fa-solid fa-folder-open"></i></div>
       <div class="tab" data-tab="requests"><i class="fa-solid fa-envelope"></i></div>
-      <div class="tab" data-tab="users"><i class="fa-solid fa-users-cog"></i></div>
     </div>
     
-    <!-- Create Notice Tab -->
     <div class="tab-content active" id="create-tab">
       <h2>Create New Notice</h2>
       <form id="noticeForm">
@@ -102,7 +89,6 @@
           <textarea id="noticeBody" rows="6" required maxlength="500"></textarea>
           <small class="note" id="bodyCounter">0/500 characters</small>
         </div>
-        <!-- Showing Home Page -->
         <div class="checkbox-group">
           <input type="checkbox" id="showOnHomepage">
           <label for="showOnHomepage">Show on Home Page</label>
@@ -118,36 +104,24 @@
       </form>
     </div>
     
-    <!-- Manage Notices Tab -->
     <div class="tab-content" id="manage-tab">
       <h2>Notice Management</h2>
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchNotices" placeholder="Search notices...">
-      </div>
       <div id="noticesList"></div>
       <div class="pagination" id="pagination"></div>
     </div>
     
-    <!-- Notice Requests Tab -->
     <div class="tab-content" id="requests-tab">
       <h2>Notice Requests</h2>
       <div id="requestsList"></div>
     </div>
-    
-    <!-- User Management Tab -->
-    <div class="tab-content" id="users-tab">
-      <h2>User Management</h2>
-      <div id="usersList"></div>
-    </div>
   </section>
-  <!-- Public Notices - Visible to everyone -->
+  
   <section id="publicNotices" class="card">
     <h2>Latest Notices</h2>
     <div id="publicNoticesList"></div>
     <div class="pagination" id="publicPagination"></div>
   </section>
-  <!-- User Notice Request Section - For regular users -->
+  
   <section id="userRequestSection" class="card hidden">
     <h2>Request a Notice</h2>
     <form id="noticeRequestForm">
@@ -172,7 +146,7 @@
     <h3 style="margin-top: 24px;">My Requests</h3>
     <div id="myRequestsList"></div>
   </section>
-  <!-- Login Section - Only show when not logged in -->
+  
   <section id="loginSection" class="card">
     <h2>Login Required</h2>
     <p>Login to enjoy More features</p>
@@ -192,7 +166,6 @@
   </div>
 </footer>
 
-<!-- Firebase Services - CORRECT ORDER -->
 <script src="firebase-auth.js"></script>
 <script src="firebase-db.js"></script>
 <script src="notice.js"></script>
