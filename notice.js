@@ -5,24 +5,66 @@ const STORAGE_REMEMBER_ME = 'mini_remember_me';
 const SESSION_USER = 'session_user_box';
 const NOTICES_PER_PAGE = 5;
 
-function saveUsers(users) {
+// Firebase Functions - NEW
+async function saveUsers(users) {
+  // For Firebase, users are managed in Firebase Authentication
+  // We'll keep this for backward compatibility
   localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
 }
-function loadUsers() {
+
+async function loadUsers() {
+  // For Firebase, we'll get users from Firebase Auth
   return JSON.parse(localStorage.getItem(STORAGE_USERS) || '[]');
 }
-function saveNotices(notices) {
-  localStorage.setItem(STORAGE_NOTICES, JSON.stringify(notices));
+
+async function saveNotices(notices) {
+  // For Firebase, we save to Firestore
+  try {
+    // Clear existing notices and save new ones
+    localStorage.setItem(STORAGE_NOTICES, JSON.stringify(notices));
+  } catch (error) {
+    console.error('Error saving notices to localStorage:', error);
+  }
 }
-function loadNotices() {
-  return JSON.parse(localStorage.getItem(STORAGE_NOTICES) || '[]');
+
+async function loadNotices() {
+  try {
+    // Try Firebase first
+    const firebaseNotices = await dbService.getNotices();
+    if (firebaseNotices && firebaseNotices.length > 0) {
+      return firebaseNotices;
+    }
+    // Fallback to localStorage
+    return JSON.parse(localStorage.getItem(STORAGE_NOTICES) || '[]');
+  } catch (error) {
+    console.error('Error loading notices:', error);
+    return JSON.parse(localStorage.getItem(STORAGE_NOTICES) || '[]');
+  }
 }
-function saveRequests(requests) {
-  localStorage.setItem(STORAGE_REQUESTS, JSON.stringify(requests));
+
+async function saveRequests(requests) {
+  try {
+    localStorage.setItem(STORAGE_REQUESTS, JSON.stringify(requests));
+  } catch (error) {
+    console.error('Error saving requests to localStorage:', error);
+  }
 }
-function loadRequests() {
-  return JSON.parse(localStorage.getItem(STORAGE_REQUESTS) || '[]');
+
+async function loadRequests() {
+  try {
+    // Try Firebase first
+    const firebaseRequests = await dbService.getRequests();
+    if (firebaseRequests && firebaseRequests.length > 0) {
+      return firebaseRequests;
+    }
+    // Fallback to localStorage
+    return JSON.parse(localStorage.getItem(STORAGE_REQUESTS) || '[]');
+  } catch (error) {
+    console.error('Error loading requests:', error);
+    return JSON.parse(localStorage.getItem(STORAGE_REQUESTS) || '[]');
+  }
 }
+
 function getCurrentUser() {
   // First check session storage
   const sessionUser = sessionStorage.getItem(SESSION_USER);
@@ -30,34 +72,32 @@ function getCurrentUser() {
     return JSON.parse(sessionUser);
   }
   
-  // rebember me optn chek
+  // Remember me option check
   const rememberMe = localStorage.getItem(STORAGE_REMEMBER_ME);
   if (rememberMe) {
     const rememberedUser = JSON.parse(rememberMe);
-    // Verify user still exists
-    const users = loadUsers();
-    const userExists = users.find(u => u.username === rememberedUser.username && u.password === rememberedUser.password);
-    if (userExists) {
-      setCurrentUser(userExists);
-      return userExists;
-    }
+    return rememberedUser;
   }
   
   return null;
 }
+
 function setCurrentUser(user) {
   sessionStorage.setItem(SESSION_USER, JSON.stringify(user));
 }
+
 function clearCurrentUser() {
   sessionStorage.removeItem(SESSION_USER);
   localStorage.removeItem(STORAGE_REMEMBER_ME);
 }
+
 function setRememberMe(user) {
   localStorage.setItem(STORAGE_REMEMBER_ME, JSON.stringify({
     username: user.username,
     password: user.password
   }));
 }
+
 function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -67,14 +107,16 @@ function formatDate(timestamp) {
     minute: '2-digit'
   });
 }
+
 // Check login status for all pages..
 function checkLoginStatus() {
     const user = getCurrentUser();
     return user;
 }
+
 // Initialize with admin users if not exists
-(function() {
-  const users = loadUsers();
+(async function() {
+  const users = await loadUsers();
   
   // Check if R exists
   if (!users.some(u => u.username === 'Riyad' && u.role === 'admin')) {
@@ -106,15 +148,16 @@ function checkLoginStatus() {
     console.log('Admin user 2 created: Shaomi (Shareqa Shaomi)');
   }
   
-  saveUsers(users);
+  await saveUsers(users);
   
   // No Default Note
-  const notices = loadNotices();
+  const notices = await loadNotices();
   if (notices.length === 0) {
     // No sample notices will be added
-    saveNotices([]);
+    await saveNotices([]);
   }
 })();
+
 // DOM Elements
 const authForm = document.getElementById('authForm');
 const signupBtn = document.getElementById('signupBtn');
@@ -136,12 +179,14 @@ const bodyCounter = document.getElementById('bodyCounter');
 const requestTitleCounter = document.getElementById('requestTitleCounter');
 const requestBodyCounter = document.getElementById('requestBodyCounter');
 const rememberMeCheckbox = document.getElementById('rememberMe');
+
 // State variables
 let currentPage = 1;
 let currentPublicPage = 1;
 let searchQuery = '';
+
 // Show/hide sections based on user role and page
-function showSectionsBasedOnRole(user, page) {
+async function showSectionsBasedOnRole(user, page) {
   // Always show menu bar and public notices
   if (headerSection) headerSection.classList.add('hidden'); // Initially hide header
   if (publicNotices) publicNotices.classList.remove('hidden');
@@ -161,29 +206,32 @@ function showSectionsBasedOnRole(user, page) {
     }
     return;
   }
+  
   // Logged in - update greeting with display name
   if (document.getElementById('userGreeting')) {
     const displayName = user.displayName || user.username;
     document.getElementById('userGreeting').textContent = `Hello, ${displayName}${user.role === 'admin' ? ' (Admin)' : ''}`;
   }
+  
   // Show role-specific sections based on current page
-  if (page === 'notice.html') { //______________________LINK_LOG_IN_PAGE_________________________
+  if (page === 'notice.html') {
     if (user.role === 'admin') {
       // Only show admin board and admin box for admin users
       if (headerSection) headerSection.classList.remove('hidden');
       if (adminBox) adminBox.classList.remove('hidden');
-      if (publicNotices) publicNotices.classList.add('hidden'); // Notice Hide hobe 4 adlog
-      updateStats();
-      renderNotices();
+      if (publicNotices) publicNotices.classList.add('hidden'); // Notice Hide hobe 4 admin
+      await updateStats();
+      await renderNotices();
     } else {
       // Regular user on admin page - show request section only (no admin board)
       if (userRequestSection) userRequestSection.classList.remove('hidden');
-      renderMyRequests();
+      await renderMyRequests();
     }
   }
 }
+
 // Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
   // Check login status
   const user = checkLoginStatus();
   
@@ -191,10 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const currentPageName = window.location.pathname.split('/').pop() || 'others.html';
   
   // Show appropriate sections
-  showSectionsBasedOnRole(user, currentPageName);
+  await showSectionsBasedOnRole(user, currentPageName);
   
   // Load public notices for all pages
-  showPublicNotices();
+  await showPublicNotices();
   
   // Character counters for admin form
   if (document.getElementById('noticeTitle')) {
@@ -232,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', function() {
+    tab.addEventListener('click', async function() {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       
@@ -240,11 +288,11 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById(`${this.dataset.tab}-tab`).classList.add('active');
       
       if (this.dataset.tab === 'manage') {
-        renderNotices(currentPage, searchQuery);
+        await renderNotices(currentPage, searchQuery);
       } else if (this.dataset.tab === 'requests') {
-        renderRequests();
+        await renderRequests();
       } else if (this.dataset.tab === 'users') {
-        renderUsers();
+        await renderUsers();
       }
     });
   });
@@ -258,9 +306,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
 // AUTHENTICATION WITH REMEMBER ME
 if (authForm) {
-  authForm.addEventListener('submit', function(e) {
+  authForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const username = document.getElementById('authUser').value.trim();
     const password = document.getElementById('authPass').value;
@@ -271,7 +320,7 @@ if (authForm) {
       return;
     }
     
-    const users = loadUsers();
+    const users = await loadUsers();
     const foundUser = users.find(u => u.username === username && u.password === password);
     
     if (foundUser) {
@@ -283,8 +332,8 @@ if (authForm) {
       }
       
       // Get current page and show appropriate sections
-      const currentPageName = window.location.pathname.split('/').pop() || 'others.html'; //____LOG_IN_PAGE___
-      showSectionsBasedOnRole(foundUser, currentPageName);
+      const currentPageName = window.location.pathname.split('/').pop() || 'others.html';
+      await showSectionsBasedOnRole(foundUser, currentPageName);
       
       showAlert('Login successful!', 'success');
     } else {
@@ -292,6 +341,7 @@ if (authForm) {
     }
   });
 }
+
 if (signupBtn) {
   signupBtn.addEventListener('click', function() {
     const username = prompt('Username:');
@@ -308,7 +358,7 @@ if (signupBtn) {
     
     const users = loadUsers();
     if (users.some(u => u.username === username)) {
-      alert('This username is already taken.'); //____JODI_SM_USERN_ALREDY_EXSIST_KRE_____
+      alert('This username is already taken.');
       return;
     }
     
@@ -322,25 +372,28 @@ if (signupBtn) {
     
     users.push(newUser);
     saveUsers(users);
-    alert('Account created successfully. Please login now.'); //__AC_CREATN MSG___
+    alert('Account created successfully. Please login now.');
   });
 }
+
 if (logoutBtn) {
   logoutBtn.addEventListener('click', function() {
     clearCurrentUser();
     // Show auth section after logout
-    const currentPageName = window.location.pathname.split('/').pop() || 'others.html'; //____LOG_IN_PAGE_3RD_AT___
+    const currentPageName = window.location.pathname.split('/').pop() || 'others.html';
     showSectionsBasedOnRole(null, currentPageName);
     showAlert('Logout successful!', 'success');
   });
 }
-// ___NOTICE_MANAGEMENT_4_ADMIN___
+
+// NOTICE_MANAGEMENT_4_ADMIN
 if (document.getElementById('noticeForm')) {
   document.getElementById('noticeForm').addEventListener('submit', function(e) {
     e.preventDefault();
     saveNotice();
   });
 }
+
 if (document.getElementById('clearNotice')) {
   document.getElementById('clearNotice').addEventListener('click', function() {
     document.getElementById('noticeForm').reset();
@@ -349,13 +402,15 @@ if (document.getElementById('clearNotice')) {
     if (bodyCounter) bodyCounter.textContent = '0/500 characters';
   });
 }
-//____NOTICE_REQUEST_4_USERS____
+
+// NOTICE_REQUEST_4_USERS
 if (document.getElementById('noticeRequestForm')) {
   document.getElementById('noticeRequestForm').addEventListener('submit', function(e) {
     e.preventDefault();
     submitRequest();
   });
 }
+
 if (document.getElementById('clearRequest')) {
   document.getElementById('clearRequest').addEventListener('click', function() {
     document.getElementById('noticeRequestForm').reset();
@@ -363,63 +418,67 @@ if (document.getElementById('clearRequest')) {
     if (requestBodyCounter) requestBodyCounter.textContent = '0/500 characters';
   });
 }
-//New Changes For 3rd File Copy.. ____MY_FILE____
-function saveNotice() {
+
+// FIREBASE NOTICE MANAGEMENT
+async function saveNotice() {
   const id = document.getElementById('noticeId').value;
   const title = document.getElementById('noticeTitle').value.trim();
   const body = document.getElementById('noticeBody').value.trim();
   const pinned = document.getElementById('noticePinned').checked;
-  const showOnHomepage = document.getElementById('showOnHomepage').checked; // Home Page...
+  const showOnHomepage = document.getElementById('showOnHomepage').checked;
   
   if (!title || !body) {
     showAlert('Title and message are required.', 'error', 'authAlert');
     return;
   }
+  
   const user = getCurrentUser();
   if (!user) {
-    showAlert('Login required.', 'error', 'authAlert'); 
+    showAlert('Login required.', 'error', 'authAlert');
     return;
   }
-  let notices = loadNotices();
-  if (id) {
-    // Editing existing notice
-    notices = notices.map(n => 
-      n.id == id ? {
-        ...n,
-        title,
-        body,
-        pinned,
-        showOnHomepage, // Home Page..
-        updatedAt: Date.now()
-      } : n
-    );
-  } else {
-    // ___4_NEW_NOTICE___
-    notices.push({
-      id: Date.now(),
-      title,
-      body,
-      author: user.username,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      published: true,
-      pinned,
-      showOnHomepage: showOnHomepage // _____SW_HOME_PAGE_NOTICE____
-    });
+
+  const noticeData = {
+    title,
+    body,
+    author: user.displayName || user.username,
+    authorId: user.uid || user.id,
+    pinned,
+    showOnHomepage,
+    published: true
+  };
+
+  try {
+    let result;
+    
+    if (id) {
+      // Editing existing notice - Firebase
+      result = await dbService.updateNotice(id, noticeData);
+    } else {
+      // Creating new notice - Firebase
+      result = await dbService.createNotice(noticeData);
+    }
+
+    if (result.success) {
+      document.getElementById('noticeForm').reset();
+      document.getElementById('noticeId').value = '';
+      if (titleCounter) titleCounter.textContent = '0/100 characters';
+      if (bodyCounter) bodyCounter.textContent = '0/500 characters';
+      
+      showAlert('Notice published successfully!', 'success', 'authAlert');
+      
+      await renderNotices(currentPage, searchQuery);
+      await showPublicNotices();
+      await updateStats();
+    } else {
+      showAlert('Error: ' + result.error, 'error', 'authAlert');
+    }
+  } catch (error) {
+    showAlert('Error saving notice: ' + error.message, 'error', 'authAlert');
   }
-  saveNotices(notices);
-  document.getElementById('noticeForm').reset();
-  document.getElementById('noticeId').value = '';
-  if (titleCounter) titleCounter.textContent = '0/100 characters'; //__CUNT_NUM
-  if (bodyCounter) bodyCounter.textContent = '0/500 characters'; //__CUNT_NUM
-  
-  showAlert('Notice published successfully!', 'success', 'authAlert');
-  
-  renderNotices(currentPage, searchQuery);
-  showPublicNotices();
-  updateStats();
 }
-function submitRequest() {
+
+async function submitRequest() {
   const title = document.getElementById('requestTitle').value.trim();
   const body = document.getElementById('requestBody').value.trim();
   
@@ -433,34 +492,43 @@ function submitRequest() {
     showAlert('Login required.', 'error');
     return;
   }
-  
-  let requests = loadRequests();
-  
-  requests.push({
-    id: Date.now(),
+
+  const requestData = {
     title,
     body,
-    author: user.username,
-    createdAt: Date.now(),
-    status: 'pending'
-  });
-  
-  saveRequests(requests);
-  document.getElementById('noticeRequestForm').reset();
-  if (requestTitleCounter) requestTitleCounter.textContent = '0/100 characters';
-  if (requestBodyCounter) requestBodyCounter.textContent = '0/500 characters';
-  
-  showAlert('Notice request submitted successfully!', 'success');
-  renderMyRequests();
-  updateStats();
+    author: user.displayName || user.username,
+    authorId: user.uid || user.id
+  };
+
+  try {
+    const result = await dbService.createRequest(requestData);
+    
+    if (result.success) {
+      document.getElementById('noticeRequestForm').reset();
+      if (requestTitleCounter) requestTitleCounter.textContent = '0/100 characters';
+      if (requestBodyCounter) requestBodyCounter.textContent = '0/500 characters';
+      
+      showAlert('Notice request submitted successfully!', 'success');
+      await renderMyRequests();
+      await updateStats();
+    } else {
+      showAlert('Error: ' + result.error, 'error');
+    }
+  } catch (error) {
+    showAlert('Error submitting request: ' + error.message, 'error');
+  }
 }
-function editNotice(id) {
-  const notice = loadNotices().find(n => n.id === id);
+
+async function editNotice(id) {
+  const notices = await loadNotices();
+  const notice = notices.find(n => n.id === id);
+  
   if (notice) {
     document.getElementById('noticeId').value = notice.id;
     document.getElementById('noticeTitle').value = notice.title;
     document.getElementById('noticeBody').value = notice.body;
     document.getElementById('noticePinned').checked = notice.pinned;
+    document.getElementById('showOnHomepage').checked = notice.showOnHomepage;
     
     if (titleCounter) titleCounter.textContent = `${notice.title.length}/100 characters`;
     if (bodyCounter) bodyCounter.textContent = `${notice.body.length}/500 characters`;
@@ -473,86 +541,151 @@ function editNotice(id) {
     document.getElementById('create-tab').classList.add('active');
   }
 }
-function deleteNotice(id) {
+
+async function deleteNotice(id) {
   if (confirm('Are you sure you want to delete this notice?')) {
-    const notices = loadNotices().filter(n => n.id !== id);
-    saveNotices(notices);
-    renderNotices(currentPage, searchQuery);
-    showPublicNotices();
-    updateStats();
-    showAlert('Notice deleted successfully.', 'success', 'authAlert');
+    try {
+      const result = await dbService.deleteNotice(id);
+      
+      if (result.success) {
+        await renderNotices(currentPage, searchQuery);
+        await showPublicNotices();
+        await updateStats();
+        showAlert('Notice deleted successfully.', 'success', 'authAlert');
+      } else {
+        showAlert('Error: ' + result.error, 'error', 'authAlert');
+      }
+    } catch (error) {
+      // Fallback to localStorage
+      const notices = await loadNotices();
+      const updatedNotices = notices.filter(n => n.id !== id);
+      await saveNotices(updatedNotices);
+      
+      await renderNotices(currentPage, searchQuery);
+      await showPublicNotices();
+      await updateStats();
+      showAlert('Notice deleted successfully.', 'success', 'authAlert');
+    }
   }
 }
-function togglePublishStatus(id) {
-  const notices = loadNotices();
-  const updatedNotices = notices.map(n => 
-    n.id === id ? { ...n, published: !n.published, updatedAt: Date.now() } : n
-  );
-  saveNotices(updatedNotices);
-  renderNotices(currentPage, searchQuery);
-  showPublicNotices();
-  updateStats();
+
+async function togglePublishStatus(id) {
+  const notices = await loadNotices();
+  const notice = notices.find(n => n.id === id);
+  
+  if (notice) {
+    const updatedNotice = {
+      ...notice,
+      published: !notice.published,
+      updatedAt: Date.now()
+    };
+    
+    try {
+      const result = await dbService.updateNotice(id, updatedNotice);
+      if (result.success) {
+        await renderNotices(currentPage, searchQuery);
+        await showPublicNotices();
+        await updateStats();
+      }
+    } catch (error) {
+      // Fallback to localStorage
+      const updatedNotices = notices.map(n => 
+        n.id === id ? updatedNotice : n
+      );
+      await saveNotices(updatedNotices);
+      await renderNotices(currentPage, searchQuery);
+      await showPublicNotices();
+      await updateStats();
+    }
+  }
 }
-function togglePinStatus(id) {
-  const notices = loadNotices();
-  const updatedNotices = notices.map(n => 
-    n.id === id ? { ...n, pinned: !n.pinned, updatedAt: Date.now() } : n
-  );
-  saveNotices(updatedNotices);
-  renderNotices(currentPage, searchQuery);
-  showPublicNotices();
-  updateStats();
+
+async function togglePinStatus(id) {
+  const notices = await loadNotices();
+  const notice = notices.find(n => n.id === id);
+  
+  if (notice) {
+    const updatedNotice = {
+      ...notice,
+      pinned: !notice.pinned,
+      updatedAt: Date.now()
+    };
+    
+    try {
+      const result = await dbService.updateNotice(id, updatedNotice);
+      if (result.success) {
+        await renderNotices(currentPage, searchQuery);
+        await showPublicNotices();
+        await updateStats();
+      }
+    } catch (error) {
+      // Fallback to localStorage
+      const updatedNotices = notices.map(n => 
+        n.id === id ? updatedNotice : n
+      );
+      await saveNotices(updatedNotices);
+      await renderNotices(currentPage, searchQuery);
+      await showPublicNotices();
+      await updateStats();
+    }
+  }
 }
-function approveRequest(requestId) {
-  const requests = loadRequests();
+
+async function approveRequest(requestId) {
+  const requests = await loadRequests();
   const request = requests.find(r => r.id === requestId);
   
   if (request) {
     // Add to notices
-    const notices = loadNotices();
-    notices.push({
-      id: Date.now(),
+    const noticeData = {
       title: request.title,
       body: request.body,
       author: request.author,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      authorId: request.authorId,
       published: true,
-      pinned: false
-    });
-    saveNotices(notices);
-    
-    // Update request status
-    const updatedRequests = requests.map(r => 
-      r.id === requestId ? { ...r, status: 'approved' } : r
-    );
-    saveRequests(updatedRequests);
-    
-    renderRequests();
-    renderMyRequests();
-    updateStats();
-    showAlert('Notice request approved successfully!', 'success', 'authAlert');
+      pinned: false,
+      showOnHomepage: true
+    };
+
+    try {
+      // Create notice in Firebase
+      const noticeResult = await dbService.createNotice(noticeData);
+      
+      if (noticeResult.success) {
+        // Update request status in Firebase
+        await dbService.updateRequestStatus(requestId, 'approved');
+        
+        await renderRequests();
+        await renderMyRequests();
+        await updateStats();
+        showAlert('Notice request approved successfully!', 'success', 'authAlert');
+      }
+    } catch (error) {
+      showAlert('Error approving request: ' + error.message, 'error', 'authAlert');
+    }
   }
 }
-function rejectRequest(requestId) {
+
+async function rejectRequest(requestId) {
   if (confirm('Are you sure you want to reject this request?')) {
-    const requests = loadRequests();
-    const updatedRequests = requests.map(r => 
-      r.id === requestId ? { ...r, status: 'rejected' } : r
-    );
-    saveRequests(updatedRequests);
-    
-    renderRequests();
-    renderMyRequests();
-    updateStats();
-    showAlert('Notice request rejected successfully!', 'success', 'authAlert');
+    try {
+      await dbService.updateRequestStatus(requestId, 'rejected');
+      
+      await renderRequests();
+      await renderMyRequests();
+      await updateStats();
+      showAlert('Notice request rejected successfully!', 'success', 'authAlert');
+    } catch (error) {
+      showAlert('Error rejecting request: ' + error.message, 'error', 'authAlert');
+    }
   }
 }
+
 // Rendering functions
-function renderNotices(page = 1, query = '') {
+async function renderNotices(page = 1, query = '') {
   if (!noticesList) return;
   
-  let notices = loadNotices();
+  let notices = await loadNotices();
   
   // Filter by search query
   if (query) {
@@ -601,16 +734,16 @@ function renderNotices(page = 1, query = '') {
       </div>
       <p>${notice.body}</p>
       <div class="notice-actions">
-        <button class="btn-small" onclick="editNotice(${notice.id})">Edit</button>
+        <button class="btn-small" onclick="editNotice('${notice.id}')">Edit</button>
         <button class="btn-small ${notice.published ? 'btn-warning' : 'btn-success'}" 
-                onclick="togglePublishStatus(${notice.id})">
+                onclick="togglePublishStatus('${notice.id}')">
           ${notice.published ? 'Unpublish' : 'Publish'}
         </button>
         <button class="btn-small ${notice.pinned ? 'btn-soft' : 'btn-warning'}" 
-                onclick="togglePinStatus(${notice.id})">
+                onclick="togglePinStatus('${notice.id}')">
           ${notice.pinned ? 'Unpin' : 'Pin'}
         </button>
-        <button class="btn-small btn-danger" onclick="deleteNotice(${notice.id})">Delete</button>
+        <button class="btn-small btn-danger" onclick="deleteNotice('${notice.id}')">Delete</button>
       </div>
     `;
     
@@ -624,19 +757,21 @@ function renderNotices(page = 1, query = '') {
     });
   }
 }
-function renderRequests() {
+
+async function renderRequests() {
   if (!requestsList) return;
   
-  const requests = loadRequests().filter(r => r.status === 'pending');
+  const requests = await loadRequests();
+  const pendingRequests = requests.filter(r => r.status === 'pending');
   
   requestsList.innerHTML = '';
   
-  if (requests.length === 0) {
+  if (pendingRequests.length === 0) {
     requestsList.innerHTML = '<div class="alert alert-info">No pending requests.</div>';
     return;
   }
   
-  requests.forEach(request => {
+  pendingRequests.forEach(request => {
     const div = document.createElement('div');
     div.className = 'notice request';
     
@@ -647,30 +782,32 @@ function renderRequests() {
       </div>
       <p>${request.body}</p>
       <div class="notice-actions">
-        <button class="btn-small btn-success" onclick="approveRequest(${request.id})">Approve</button>
-        <button class="btn-small btn-danger" onclick="rejectRequest(${request.id})">Reject</button>
+        <button class="btn-small btn-success" onclick="approveRequest('${request.id}')">Approve</button>
+        <button class="btn-small btn-danger" onclick="rejectRequest('${request.id}')">Reject</button>
       </div>
     `;
     
     requestsList.appendChild(div);
   });
 }
-function renderMyRequests() {
+
+async function renderMyRequests() {
   if (!myRequestsList) return;
   
   const user = getCurrentUser();
   if (!user) return;
   
-  const requests = loadRequests().filter(r => r.author === user.username);
+  const requests = await loadRequests();
+  const userRequests = requests.filter(r => r.author === user.username);
   
   myRequestsList.innerHTML = '';
   
-  if (requests.length === 0) {
+  if (userRequests.length === 0) {
     myRequestsList.innerHTML = '<div class="alert alert-info">You have no requests.</div>';
     return;
   }
   
-  requests.forEach(request => {
+  userRequests.forEach(request => {
     const div = document.createElement('div');
     div.className = 'notice request';
     
@@ -694,21 +831,23 @@ function renderMyRequests() {
     myRequestsList.appendChild(div);
   });
 }
-function showPublicNotices(page = 1) {
+
+async function showPublicNotices(page = 1) {
   if (!publicNoticesList) return;
   
-  let notices = loadNotices().filter(n => n.published);
+  let notices = await loadNotices();
+  const publishedNotices = notices.filter(n => n.published);
   
   // Sort by pinned first, then by creation date (newest first)
-  notices.sort((a, b) => {
+  publishedNotices.sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
     return b.createdAt - a.createdAt;
   });
   
-  const totalPages = Math.ceil(notices.length / NOTICES_PER_PAGE);
+  const totalPages = Math.ceil(publishedNotices.length / NOTICES_PER_PAGE);
   const startIndex = (page - 1) * NOTICES_PER_PAGE;
-  const paginatedNotices = notices.slice(startIndex, startIndex + NOTICES_PER_PAGE);
+  const paginatedNotices = publishedNotices.slice(startIndex, startIndex + NOTICES_PER_PAGE);
   
   publicNoticesList.innerHTML = '';
   
@@ -719,6 +858,7 @@ function showPublicNotices(page = 1) {
     }
     return;
   }
+  
   paginatedNotices.forEach(notice => {
     const div = document.createElement('div');
     div.className = `notice ${notice.pinned ? 'pinned' : ''}`;
@@ -729,10 +869,11 @@ function showPublicNotices(page = 1) {
         ${formatDate(notice.createdAt)} | ${notice.author}
       </div>
       <p style="white-space: pre-line;">${notice.body}</p> 
-    `; // space Catchable 
+    `;
     
     publicNoticesList.appendChild(div);
   });
+  
   if (document.getElementById('publicPagination')) {
     renderPagination('publicPagination', page, totalPages, (newPage) => {
       currentPublicPage = newPage;
@@ -740,10 +881,11 @@ function showPublicNotices(page = 1) {
     });
   }
 }
-function renderUsers() {
+
+async function renderUsers() {
   if (!usersList) return;
   
-  const users = loadUsers();
+  const users = await loadUsers();
   const currentUser = getCurrentUser();
   
   usersList.innerHTML = '';
@@ -777,6 +919,7 @@ function renderUsers() {
     usersList.appendChild(div);
   });
 }
+
 function renderPagination(containerId, currentPage, totalPages, onPageChange) {
   const container = document.getElementById(containerId);
   
@@ -814,17 +957,20 @@ function renderPagination(containerId, currentPage, totalPages, onPageChange) {
     container.innerHTML = '';
   }
 }
-function deleteUser(userId) {
+
+async function deleteUser(userId) {
   if (confirm('Are you sure you want to delete this user?')) {
-    const users = loadUsers().filter(u => u.id !== userId);
-    saveUsers(users);
-    renderUsers();
+    const users = await loadUsers();
+    const updatedUsers = users.filter(u => u.id !== userId);
+    await saveUsers(updatedUsers);
+    await renderUsers();
     showAlert('User deleted successfully.', 'success', 'authAlert');
   }
 }
-function updateStats() {
-  const notices = loadNotices();
-  const requests = loadRequests();
+
+async function updateStats() {
+  const notices = await loadNotices();
+  const requests = await loadRequests();
   const pendingRequests = requests.filter(r => r.status === 'pending').length;
   
   if (document.getElementById('totalNotices')) {
@@ -842,6 +988,7 @@ function updateStats() {
       notices.filter(n => n.pinned).length;
   }
 }
+
 function showAlert(message, type, containerId = 'authAlert') {
   const container = document.getElementById(containerId);
   if (container) {
@@ -853,3 +1000,21 @@ function showAlert(message, type, containerId = 'authAlert') {
     }, 5000);
   }
 }
+
+// Real-time updates for Firebase
+function enableRealTimeUpdates() {
+  try {
+    dbService.onNoticesChange((notices) => {
+      renderNotices();
+      showPublicNotices();
+      updateStats();
+    });
+  } catch (error) {
+    console.log('Real-time updates not available:', error);
+  }
+}
+
+// Enable real-time updates when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  enableRealTimeUpdates();
+});
