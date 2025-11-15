@@ -107,27 +107,21 @@ button:hover {
 button:active {
   transform: scale(0.98);
 }
-/* Renk varyasyonları - buton stilleri */
 .btn-success {
   background: var(--success);
 }
-
 .btn-success:hover {
   background: #2f855a;
 }
-
 .btn-danger {
   background: var(--danger);
 }
-
 .btn-danger:hover {
   background: #c53030;
 }
-
 .btn-warning {
   background: var(--warning);
 }
-
 .btn-warning:hover {
   background: #c05621;
 }
@@ -135,15 +129,12 @@ button:active {
 .hidden {
   display: none !important;
 }
-
 .visible {
   display: block;
 }
-
 .flex.visible {
   display: flex;
 }
-
 /* Responsive design improvements */
 @media (max-width: 768px) {
   .stats-grid {
@@ -161,13 +152,11 @@ button:active {
     align-self: flex-end;
   }
 }
-
 /* Loading states */
 .loading {
   opacity: 0.6;
   pointer-events: none;
 }
-
 /* Success/Error messages */
 .alert {
   padding: 12px 16px;
@@ -175,19 +164,16 @@ button:active {
   margin-bottom: 16px;
   font-weight: 500;
 }
-
 .alert-success {
   background-color: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
-
 .alert-error {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
-
 .alert-info {
   background-color: #d1ecf1;
   color: #0c5460;
@@ -197,43 +183,31 @@ button:active {
   background: var(--light);
   color: var(--dark);
 }
-
 .btn-soft:hover {
   background: #edf2f7;
 }
-
-/* Küçük boyutlu buton */
 .btn-small {
   padding: 6px 10px;
   font-size: 14px;
 }
-
-/* Gizli element sınıfı */
 .hidden {
   display: none;
 }
-
-/* Flexbox yardımcı sınıfları */
 .flex {
   display: flex;
   align-items: center;
 }
-
 .flex-between {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .gap {
   gap: 8px;
 }
-
 .gap-lg {
   gap: 16px;
 }
-
-/* Bildirim/duyuru bileşeni */
 .notice {
   border-left: 4px solid var(--primary);
   padding: 16px;
@@ -242,110 +216,82 @@ button:active {
   border-radius: 0 6px 6px 0;
   position: relative;
 }
-
-/* Sabitlenmiş bildirim */
 .notice.pinned {
   border-left-color: var(--warning);
   background: #fffaf0;
 }
-
-/* İstek bildirimi */
 .notice.request {
   border-left-color: var(--warning);
   background: #fffaf0;
 }
-
 .notice h3 {
   margin: 0 0 8px 0;
   font-size: 18px;
 }
-
-/* Bildirim meta bilgileri */
 .notice-meta {
   font-size: 14px;
   color: var(--secondary);
   margin-bottom: 8px;
 }
-
-/* Bildirim aksiyon butonları */
 .notice-actions {
   margin-top: 12px;
   display: flex;
   gap: 8px;
 }
-
-/* Kullanıcı bilgi kutusu */
 .user-info {
   background: var(--light);
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: 16px;
 }
-
-/* Uyarı mesajı bileşeni */
 .alert {
   padding: 12px 16px;
   border-radius: 6px;
   margin-bottom: 16px;
 }
-
-/* Uyarı türleri */
 .alert-success {
   background: #f0fff4;
   border: 1px solid #9ae6b4;
   color: #276749;
 }
-
 .alert-error {
   background: #fed7d7;
   border: 1px solid #feb2b2;
   color: #c53030;
 }
-
 .alert-info {
   background: #e6fffa;
   border: 1px solid #81e6d9;
   color: #234e52;
 }
-
-/* Sekme navigasyonu */
 .tabs {
   display: flex;
   border-bottom: 1px solid var(--border);
   margin-bottom: 16px;
 }
-
 .tab {
   padding: 10px 16px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   font-weight: 500;
 }
-
 .tab.active {
   border-bottom-color: var(--primary);
   color: var(--primary);
 }
-
-/* Sekme içeriği */
 .tab-content {
   display: none;
 }
-
 .tab-content.active {
   display: block;
 }
-
-/* Arama kutusu */
 .search-box {
   margin-bottom: 16px;
   position: relative;
 }
-
 .search-box input {
   padding-left: 40px; /* İkon için boşluk */
 }
-
 .search-icon {
   position: absolute;
   left: 12px;
@@ -353,8 +299,6 @@ button:active {
   transform: translateY(-50%);
   color: var(--secondary);
 }
-
-/* Durum badge'leri */
 .status-badge {
   display: inline-block;
   padding: 4px 8px;
@@ -363,31 +307,24 @@ button:active {
   font-weight: 500;
   margin-left: 8px;
 }
-
-/* Durum renkleri */
 .status-published {
   background: #c6f6d5;
   color: #22543d;
 }
-
 .status-draft {
   background: #fed7d7;
   color: #742a2a;
 }
-
 .status-pending {
   background: #fefcbf;
   color: #744210;
 }
-
-/* Sayfalama bileşeni */
 .pagination {
   display: flex;
   justify-content: center;
   margin-top: 20px;
   gap: 8px;
 }
-
 .page-btn {
   padding: 8px 12px;
   border: 1px solid var(--border);
@@ -396,25 +333,20 @@ button:active {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .page-btn.active {
   background: var(--primary);
   color: white;
   border-color: var(--primary);
 }
-
 .page-btn:hover:not(.active) {
   background: var(--light);
 }
-
-/* İstatistik grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
-
 .stat-card {
   background: white;
   padding: 16px;
@@ -422,79 +354,32 @@ button:active {
   text-align: center;
   box-shadow: var(--shadow);
 }
-
 .stat-number {
   font-size: 24px;
   font-weight: bold;
   color: var(--primary);
   margin-bottom: 4px;
 }
-
 .stat-label {
   font-size: 14px;
   color: var(--secondary);
 }
-
-/* Form gruplama */
 .form-group {
   margin-bottom: 16px;
 }
-
 .form-label {
   display: block;
   margin-bottom: 6px;
   font-weight: 500;
 }
-
-/* Checkbox grupları */
 .checkbox-group {
   display: flex;
   align-items: center;
   gap: 8px;
   margin: 12px 0;
 }
-
 .checkbox-group input {
   width: auto;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.remember-me input {
-  width: auto;
-}
-/* Login section styles */
-#loginSection {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-#loginSection h2 {
-  color: var(--primary-dark);
-  margin-bottom: 16px;
-}
-
-#loginSection p {
-  color: var(--secondary);
-  margin-bottom: 24px;
-  font-size: 16px;
-}
-
-#loginSection .btn-success {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  color: white;
-  font-weight: bold;
-  border-radius: 20px;
 }
 /*Footer*/
 footer {
@@ -645,8 +530,6 @@ footer p i {
         border-radius: 10px;
     }
 }
-/* === NATURAL & BEAUTIFUL RESPONSIVE DESIGN === */
-
 /* Mobile First Approach */
 @media (max-width: 768px) {
   
@@ -945,7 +828,6 @@ footer p i {
     outline-offset: 2px;
   }
 }
-
 /* Tablet Responsive */
 @media (min-width: 769px) and (max-width: 1024px) {
   .container {
@@ -971,7 +853,6 @@ footer p i {
     flex-direction: row;
   }
 }
-
 /* Small phone optimization */
 @media (max-width: 380px) {
   .container {
@@ -997,7 +878,6 @@ footer p i {
     min-height: 50px;
   }
 }
-
 /* Landscape mode optimization */
 @media (max-width: 768px) and (orientation: landscape) {
   .container {
@@ -1013,7 +893,6 @@ footer p i {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .card {
